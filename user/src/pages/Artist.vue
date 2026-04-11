@@ -46,7 +46,7 @@
 
       <!-- 右侧歌手列表 -->
       <div class="main-content">
-        <el-scrollbar>
+        <el-scrollbar height="680">
           <!-- 歌手列表 -->
           <div class="artist-grid">
             <div
@@ -69,7 +69,7 @@
         </el-scrollbar>
 
         <!-- 分页 -->
-        <div class="pagination-container">
+        <div class="pagination-container" v-if="artists.length !== 0">
           <el-pagination
               :current-page="page.currentPage"
               :page-size="searchForm.pageSize"
@@ -191,6 +191,7 @@ const resetFilters = () => {
 }
 const handleInput = (value) => {
   searchForm.name = value
+  page.value.currentPage = 1
   fetchArtists()
 }
 const handleSelect = (parent, child) => {
@@ -203,6 +204,7 @@ const handleSelect = (parent, child) => {
       searchForm.area = child.label
       break;
   }
+  page.value.currentPage = 1
   fetchArtists()
 }
 const fetchArtists = async () => {
@@ -269,7 +271,7 @@ onMounted(() => {
 
 .main-content {
   width: calc(100% - 200px);
-  max-height: 750px;
+  height: 720px;
 }
 
 .search-box {
@@ -344,8 +346,8 @@ onMounted(() => {
 
 .artist-name {
   position: absolute;
-  bottom: -35px;
-  left: 50%;
+  bottom: 10px;
+  left: 42%;
   transform: translateX(-50%);
   background-color: rgba(0, 0, 0, 0.8);
   color: white;
@@ -354,7 +356,7 @@ onMounted(() => {
   font-size: 14px;
   white-space: nowrap;
   opacity: 0;
-  transition: opacity 0.2s ease;
+  transition: opacity 0.5s linear;
 }
 
 .artist-item:hover .artist-name {

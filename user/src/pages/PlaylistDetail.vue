@@ -6,7 +6,7 @@
       </el-icon>
     </div>
     <!-- 歌单信息区域 -->
-    <div class="like-info">
+    <div class="playlist-info">
       <div class="like-avatar">
         <el-image :alt="playlistData.title" :preview-src-list="[playlistData.coverUrl]" :show-progress=true
                   :src="playlistData.coverUrl || defaultAvatar" style="width: 100%;height: 100%;object-fit: cover;"/>
@@ -382,7 +382,7 @@ onMounted(() => {
 }
 
 /* 歌手信息区域 */
-.like-info {
+.playlist-info {
   display: flex;
   gap: 30px;
 }

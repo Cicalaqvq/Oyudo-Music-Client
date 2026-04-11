@@ -41,7 +41,7 @@
               <el-image :src="playlist.coverUrl" alt="封面"/>
               <div class="play-btn"/>
             </div>
-            <div class="like-info">
+            <div class="playlist-info">
               <h3 class="playlist-title">{{ playlist.title }}</h3>
               <p class="playlist-desc">{{ playlist.introduction }}</p>
               <el-tag>{{ playlist.style }}</el-tag>
@@ -311,7 +311,7 @@ onMounted(() => {
   position: absolute;
 }
 
-.like-info {
+.playlist-info {
   padding: 12px;
 }
 

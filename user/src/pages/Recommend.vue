@@ -26,11 +26,15 @@
         <div
             v-for="playlist in playlists"
             :key="playlist.id"
-            class="playlist-card"
+            class="playlist-item"
             @click="showPlaylistDetail(playlist)"
         >
-          <el-image lazy :alt="playlist.name" :src="playlist.coverUrl" class="playlist-cover"/>
-          <div class="like-info">
+
+          <div class="playlist-cover">
+            <el-image :src="playlist.coverUrl" alt="封面"/>
+            <div class="play-btn"/>
+          </div>
+          <div class="playlist-info">
             <div class="like-name">{{ playlist.title }}</div>
           </div>
         </div>
@@ -243,24 +247,52 @@ onMounted(() => {
   gap: 16px;
 }
 
-.playlist-card {
+.playlist-item {
   cursor: pointer;
   transition: transform 0.2s;
 }
 
-.playlist-card:hover {
+.playlist-item:hover {
   transform: translateY(-4px);
 }
 
-.playlist-cover {
-  width: 100%;
-  aspect-ratio: 1;
-  object-fit: cover;
-  border-radius: 8px;
-  margin-bottom: 8px;
+.play-btn {
+  position: absolute;
+  right: -8px;
+  bottom: -10px;
+  transform: translate(-50%, -50%);
+  width: 40px;
+  height: 40px;
+  background-color: #dedada;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transition: opacity 0.2s ease;
 }
 
-.like-info {
+.playlist-item:hover .play-btn {
+  opacity: 1;
+}
+
+.playlist-item:hover .play-btn::after {
+  content: '▷';
+  font-size: 18px;
+  font-weight: bolder;
+  position: absolute;
+}
+
+
+.playlist-cover {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+
+
+.playlist-info {
   padding: 0 4px;
 }
 
