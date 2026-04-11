@@ -5,7 +5,7 @@
       <el-carousel v-if="banners.length" :interval="4000" arrow="always" autoplay height="auto" type="card">
         <el-carousel-item v-for="banner in banners" :key="banner.id" style="height: 300px">
           <div class="banner-item">
-            <el-image lazy :src="banner.bannerUrl" class="banner-image"/>
+            <el-image :src="banner.bannerUrl" class="banner-image" lazy/>
           </div>
         </el-carousel-item>
       </el-carousel>
@@ -61,7 +61,7 @@
               @click="playSong(song)"
           >
             <div class="song-left">
-              <el-image lazy :alt="song.name" :src="song.coverUrl" class="song-cover"/>
+              <el-image :alt="song.name" :src="song.coverUrl" class="song-cover" lazy/>
               <div class="song-info">
                 <div class="song-title">{{ song.name }}</div>
                 <div class="song-artist">{{ song.artistName }}</div>
@@ -78,7 +78,7 @@
               @click="playSong(song)"
           >
             <div class="song-left">
-              <el-image lazy :alt="song.name" :src="song.coverUrl" class="song-cover"/>
+              <el-image :alt="song.name" :src="song.coverUrl" class="song-cover" lazy/>
               <div class="song-info">
                 <div class="song-title">{{ song.name }}</div>
                 <div class="song-artist">{{ song.artistName }}</div>
@@ -361,12 +361,12 @@ onMounted(() => {
 }
 
 .song-left:hover .song-cover::after {
-  content: '▶';
+  content: '▷';
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 46%;
+  left: 56%;
   transform: translate(-50%, -50%);
-  font-size: 24px;
+  font-size: 30px;
   color: white;
   z-index: 1;
 }

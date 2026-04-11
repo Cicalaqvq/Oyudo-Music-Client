@@ -184,11 +184,6 @@ const visibilityChange = (event) => {
   isShowTooltip.value = evWeight <= contentWeight;
 }
 
-// 切换喜欢状态
-const toggleLike = (index) => {
-  songsList.value[index].isLiked = !songsList.value[index].isLiked
-  // TODO: 调用 API 更新喜欢状态
-}
 
 // 下载歌曲
 const downloadSong = async (row) => {
@@ -247,7 +242,7 @@ const fetchArtistSongs = async () => {
 
 const playSong = (row) => {
   store.commit('SET_CURRENT_SONG', row);
-  store.commit("ADD_SONG_TO_USER_PLAYLIST", row);
+  store.commit("ADD_SONG_TO_TRACK_LIST", row);
   store.commit("SET_PLAYING", true);
 }
 

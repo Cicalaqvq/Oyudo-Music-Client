@@ -3,7 +3,7 @@
     <div class="player-container">
       <!-- 左侧：歌曲信息 -->
       <div class="song-info">
-        <el-image :src="localCurrentSong.coverUrl || defaultAvatar" alt="cover" class="song-cover"
+        <el-image :src="localCurrentSong.coverUrl || '/defaultSongCover.png'" alt="songCover" class="song-cover"
                   @click="showSongDetail"/>
         <div class="song-text">
 
@@ -163,7 +163,6 @@
     <!-- 歌曲详情抽屉 -->
     <el-drawer v-model="drawerVisible" :withHeader="false" direction="btt" size="100%">
       <SongDetail
-          :commentCount="commentCount"
           :comments="comments"
           :currentTime="currentTime"
           :duration="duration"
@@ -175,6 +174,9 @@
           @previous="previousSong"
           @on-progress-change="onProgressChange"
           @toggle-favorite="toggleFavorite"
+          @fetch-comments="fetchComments"
+      />
+
       />
       />
     </el-drawer>
@@ -202,18 +204,14 @@ import {LiaRandomSolid} from "vue-icons-plus/lia";
 import {useStore} from "vuex";
 import {message} from "../../utils/message.js";
 import SongDetail from "./SongDetail.vue";
-import {getCommentOfSong} from "../../api/manage.js";
-import {formatDate} from "@vueuse/core";
 import {fetchFavoriteSongs, toggleFavoriteSong} from "../../utils/userFavorite.js";
+import {fetchSongComments} from "../../utils/userComment.js";
 
 
 const store = useStore()
 const popoverVisible = ref(false)
 const drawerVisible = ref(false)
 const isShowTooltip = ref(false)
-const comments = ref([])
-const commentCount = ref(0)
-const defaultAvatar = 'https://ts1.tc.mm.bing.net/th/id/OIP-C.CDxtKQRYAPTUqYVGxNKuLQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3'
 // 当前歌曲信息
 const localCurrentSong = computed(() => store.state.CURRENT_SONG || {});
 
@@ -226,6 +224,7 @@ const localPlayMode = computed(() => store.state.PLAY_MODE || 0)
 const isFavorite = ref(false)
 const currentTime = ref(0)
 const duration = ref(0)
+const comments = ref([])
 const localVolume = computed(() => store.state.VOLUME)
 let lastVolume = localVolume.value
 const audioRef = ref(null)
@@ -274,23 +273,16 @@ const showSongDetail = () => {
   const currentSong = store.state.CURRENT_SONG
   if (currentSong) {
     drawerVisible.value = true
-    fetchSongComments(currentSong)
+    fetchComments()
   } else {
     message("请选择歌曲", "error")
   }
 }
 
-// 获取歌曲评论
-const fetchSongComments = async (song) => {
-  const res = await getCommentOfSong(song.id)
-  if (res.data.code === 200) {
-    comments.value = res.data.data
-    comments.value.forEach((comment) => {
-      comment.createTime = formatDate(new Date(comment.createTime), "YYYY年MM月DD日 HH:mm:ss");
-    })
-    commentCount.value = comments.value.length
-  }
+const fetchComments = async () => {
+  comments.value = await fetchSongComments(localCurrentSong.value.id)
 }
+
 
 // 播放歌曲
 const playSong = (song) => {
@@ -307,7 +299,7 @@ const playSong = (song) => {
 // 删除播放列表
 const deleteUserPlaylist = () => {
   popoverVisible.value = false
-  store.commit("SET_TRACK_LIST",[]);
+  store.commit("SET_TRACK_LIST", []);
   message("播放列表已清空")
 }
 
@@ -345,7 +337,6 @@ const previousSong = () => {
   }
   if (!localPlayMode.value !== 2) {
     store.commit('SET_PREV_SONG')
-    fetchSongComments(store.state.CURRENT_SONG)
     fetchFavorite()
   } else {
     audioRef.value.currentTime = 0
@@ -363,7 +354,6 @@ const nextSong = () => {
   }
   if (localPlayMode.value !== 2) {
     store.commit('SET_NEXT_SONG')
-    fetchSongComments(store.state.CURRENT_SONG)
     fetchFavorite()
   }
   audioRef.value.currentTime = 0
@@ -453,8 +443,6 @@ watchEffect(() => {
     audioRef.value.pause();
   }
 });
-
-
 </script>
 
 <style scoped>
@@ -553,12 +541,12 @@ watchEffect(() => {
 }
 
 .song-item:hover .song-item-cover::after {
-  content: '▶';
+  content: '▷';
   position: absolute;
-  top: 50%;
-  left: 50%;
+  top: 46%;
+  left: 56%;
   transform: translate(-50%, -50%);
-  font-size: 24px;
+  font-size: 30px;
   color: white;
   z-index: 1;
 }

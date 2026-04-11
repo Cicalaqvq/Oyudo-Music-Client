@@ -31,10 +31,6 @@
           <p class="meta-item">
             <span class="playlist-data">{{ songs.length }}首歌曲</span>
           </p>
-          <!--          <p class="meta-item">-->
-          <!--            <span class="label">地区：</span>-->
-          <!--            <span>{{ playlistData.area }}</span>-->
-          <!--          </p>-->
         </div>
         <div class="like-footer">
           <el-button class="play-button" style="width: 100px" type="primary" @click="playAll">
@@ -143,7 +139,7 @@
 
             <el-scrollbar height="300px">
               <div v-for="comment in comments" :key="comment.id" class="comment-item">
-                <el-image :alt="comment.user" :src="comment.userAvatar" class="comment-avatar"/>
+                <el-image :alt="comment.username" :src="comment.userAvatar || '/defaultAvatar.png'" class="comment-avatar"/>
                 <div class="comment-content">
                   <div class="comment-header">
                     <span class="comment-user">{{ comment.username }}</span>
@@ -184,6 +180,7 @@ import {
   toggleFavoritePlaylist,
   toggleFavoriteSong
 } from "../utils/userFavorite.js";
+import {fetchPlaylistComments} from "../utils/userComment.js";
 
 const isShowTooltip = ref(false)
 const routes = useRoute()
@@ -193,8 +190,6 @@ const rowClassName = (row, index) => {
   row.index = index;
 }
 const activeTab = ref('songs')
-// 默认图片
-const defaultAvatar = 'https://via.placeholder.com/300x300?text=playlist'
 
 // 歌手数据
 const playlistData = reactive({
@@ -247,7 +242,12 @@ const likeComment = async (commentId) => {
 }
 
 const handleTabChange = (tab) => {
-  // fetchComments();
+  activeTab.value = tab.paneName;
+  if (activeTab.value === 'comments') {
+    fetchComments()
+  } else {
+    fetchPlaylistSongs()
+  }
 }
 
 const visibilityChange = (event) => {
@@ -256,7 +256,6 @@ const visibilityChange = (event) => {
   const contentWeight = ev.clientHeight;
   isShowTooltip.value = evWeight <= contentWeight;
 }
-
 
 const playAll = () => {
   store.commit('SET_TRACK_LIST', songs)
@@ -328,9 +327,8 @@ const fetchPlaylistSongs = async () => {
 
 // 获取歌单评论
 const fetchComments = async () => {
-  const res = await getCommentOfPlaylist(playlistData.id)
-  if (res.data.code === 200) {
-    comments.value = res.data.data
+  comments.value = await fetchPlaylistComments(playlistData.id) || []
+  if (comments.value.length > 0) {
     comments.value.forEach((comment) => {
       comment.createTime = formatDate(new Date(comment.createTime), "YYYY年MM月DD日 HH:mm:ss");
     })
@@ -345,6 +343,7 @@ const fetchLikeSongs = async () => {
   })
 }
 
+// 播放歌曲
 const playSong = (row) => {
   store.commit('SET_CURRENT_SONG', row);
   store.commit("ADD_SONG_TO_TRACK_LIST", row);
@@ -354,7 +353,6 @@ const playSong = (row) => {
 const initData = async () => {
   await fetchPlaylistDetail()
   await fetchPlaylistSongs()
-  await fetchComments()
 }
 
 onMounted(() => {

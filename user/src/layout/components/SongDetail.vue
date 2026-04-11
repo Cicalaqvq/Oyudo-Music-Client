@@ -96,25 +96,29 @@
           </div>
 
           <div class="comments-section">
-            <h3 class="section-title">评论 ({{ commentCount }})</h3>
-            <div class="comment-input-wrapper">
-              <el-input
-                  v-model="commentText"
-                  :maxlength="180"
-                  :rows="3"
-                  placeholder="说点什么吧"
-                  resize="none"
-                  type="textarea"
-              />
-              <div class="input-footer">
-                <span class="char-count">{{ commentText.length }} / 180</span>
-                <el-button size="small" type="primary" @click="submitComment">发布</el-button>
-              </div>
-            </div>
-
+            <h3 class="section-title">评论 ({{ comments.length }})</h3>
+            <el-form ref="formRef" :model="commentForm" :rules="rules">
+              <el-form-item prop="content">
+                <div class="comment-input-wrapper">
+                  <el-input
+                      v-model="commentForm.content"
+                      :maxlength="180"
+                      :rows="3"
+                      clearable
+                      placeholder="说点什么吧"
+                      resize="none"
+                      type="textarea"
+                  />
+                  <div class="input-footer">
+                    <span class="char-count">{{ commentForm.content.length }} / 180</span>
+                    <el-button size="small" type="primary" @click="submitComment">发布</el-button>
+                  </div>
+                </div>
+              </el-form-item>
+            </el-form>
             <el-scrollbar height="500px">
               <div v-for="comment in comments" :key="comment.id" class="comment-item">
-                <el-image :alt="comment.user" :src="comment.userAvatar" class="comment-avatar"/>
+                <el-image :alt="comment.username" :src="comment.userAvatar || '/defaultAvatar.png'" class="comment-avatar"/>
                 <div class="comment-content">
                   <div class="comment-header">
                     <span class="comment-user">{{ comment.username }}</span>
@@ -140,13 +144,13 @@
   </div>
 </template>
 <script setup>
-import {computed, ref, watch} from 'vue'
+import {computed, reactive, ref, watch} from 'vue'
 import {BiHeart, BiPause, BiPlay, BiSkipNext, BiSkipPrevious, BiSolidHeart} from "vue-icons-plus/bi";
 import {useStore} from "vuex";
-import {message} from "../../utils/message.js";
 import {AiOutlineUnorderedList} from "vue-icons-plus/ai";
 import {LiaRandomSolid} from "vue-icons-plus/lia";
 import {IpPlayCycle} from "vue-icons-plus/ip";
+import {publishComment, toggleFavoriteComment} from "../../utils/userComment.js";
 
 
 const store = useStore()
@@ -160,29 +164,35 @@ const props = defineProps({
     type: Number,
     default: 0
   },
-  comments: {
-    type: Array,
-    default: () => []
-  },
-  commentCount: {
-    type: Number,
-    default: 0
-  },
   isFavorite: {
     type: Boolean,
     default: false
+  },
+  comments: {
+    type: Array,
+    default: []
   }
 })
 
-const emit = defineEmits(['play', 'pause', 'next', 'previous', 'on-progress-change', 'back', 'toggle-favorite'])
+const emit = defineEmits(['play', 'pause', 'next', 'previous', 'on-progress-change', 'back', 'toggle-favorite', 'fetch-comments'])
 
 const localCurrentTime = ref(props.currentTime)
 
-const localIsFavorite = ref(props.isFavorite)
-
 const localPlayMode = computed(() => store.state.PLAY_MODE || 0)
 
-const commentText = ref('')
+const commentForm = reactive({
+  content: '',
+  songId: null
+})
+
+const formRef = ref(null)
+
+const rules = {
+  content: [
+    {required: true, message: '请输入评论内容', trigger: 'change'},
+    {min: 1, max: 180, message: '评论长度在 1 到 180 个字符', trigger: 'blur'}
+  ]
+}
 
 const currentSong = computed(() => store.state.CURRENT_SONG || {})
 
@@ -244,39 +254,24 @@ const nextSong = () => {
   emit('next')
 }
 
-const submitComment = () => {
-  if (!commentText.value.trim()) {
-    message("请输入评论内容", "error")
-    return
-  }
-  if (commentText.value.length > 180) {
-    message("评论内容不能超过 180 字", "error")
-    return
-  }
-
-  comments.value.unshift({
-    id: Date.now(),
-    user: 'current_user',
-    avatar: 'https://cube.elemecdn.com/0/88/03b0d39595f181f5c95a78133c2468fjpeg.jpeg',
-    content: commentText.value,
-    date: new Date().toISOString().split('T')[0],
-    likes: 0
-  })
-  commentCount.value++
-  commentText.value = ''
-  message("评论成功", "success")
+const submitComment = async () => {
+  const res = await publishComment(store, commentForm)
+  if (res) fetchComments()
 }
 
-const likeComment = (commentId) => {
-  const comment = comments.value.find(c => c.id === commentId)
-  if (comment) {
-    comment.likes++
-  }
+const likeComment = async (id) => {
+  const res = await toggleFavoriteComment(store, id)
+  if (res) fetchComments()
+}
+
+const fetchComments = () => {
+  emit('fetch-comments')
 }
 
 watch(() => props.currentTime, (newVal) => {
   localCurrentTime.value = newVal
 })
+
 
 </script>
 
@@ -502,6 +497,7 @@ watch(() => props.currentTime, (newVal) => {
 
 .comment-input-wrapper {
   margin-bottom: 24px;
+  width: 100%;
 }
 
 .input-footer {
@@ -519,7 +515,7 @@ watch(() => props.currentTime, (newVal) => {
 .comment-item {
   display: flex;
   gap: 16px;
-  padding: 16px 0;
+  padding: 16px 10px;
   border-bottom: 1px solid #f0f0f0;
 }
 

@@ -136,3 +136,11 @@ export function getUserInfo() {
 export function updateUserInfo(userForm) {
     return request.put("/user/updateUser", userForm)
 }
+
+export function submitComment(commentForm) {
+    return request.post("/user/submitComment", commentForm)
+}
+
+export function likeComment(commentId) {
+    return request.put(`/user/likeComment/${commentId}`)
+}

@@ -12,7 +12,7 @@
       <el-dropdown v-if="userInfo">
         <span class="dropdown">
         <el-avatar class="avatar"
-                   :src="userInfo.userAvatar || defaultAvatar"/>
+                   :src="userInfo.userAvatar || '/defaultAvatar.png'"/>
           {{ userInfo.username }}
           <el-icon class="el-icon--right">
           <arrow-down/>
@@ -51,7 +51,6 @@ const store = useStore()
 const loginRef = ref(null)
 
 const userInfo = computed(() => store.state.USER_INFO)
-const defaultAvatar = "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png"
 const userLogout = () => {
   messageBox("确定要退出登录吗？", "提示", "warning", true).then(async () => {
     await router.push("/")
