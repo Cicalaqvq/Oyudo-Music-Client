@@ -26,64 +26,34 @@
         />
       </div>
     </div>
-    <!-- 标签页 -->
-    <div class="tabs-section">
-      <el-tabs v-model="activeTab" type="card" @tab-click="handleTabChange">
-        <el-tab-pane label="精选歌单" name="recommended">
-          <el-scrollbar height="565">
-            <div class="playlist-grid">
-              <div
-                  v-for="playlist in playlists"
-                  :key="playlist.id"
-                  v-loading="loading"
-                  class="playlist-item"
-                  @click="handleClick(playlist)"
-              >
-                <div class="playlist-cover">
-                  <el-image :src="playlist.coverUrl" alt="封面"/>
-                  <div class="play-btn"/>
-                </div>
-                <div class="like-info">
-                  <h3 class="playlist-title">{{ playlist.title }}</h3>
-                  <p class="playlist-desc">{{ playlist.introduction }}</p>
-                  <!--                  <div class="playlist-meta">-->
-                  <!--                    <span>{{ playlist.songCount }}首歌曲</span>-->
-                  <!--                    <span>·</span>-->
-                  <!--                    <span>{{ playlist.playCount }}次播放</span>-->
-                  <!--                  </div>-->
-                </div>
-              </div>
+    <!-- 歌单 -->
+    <div class="playlist-section">
+      <el-scrollbar height="610">
+        <div class="playlist-grid">
+          <div
+              v-for="playlist in playlists"
+              :key="playlist.id"
+              v-loading="loading"
+              class="playlist-item"
+              @click="handleClick(playlist)"
+          >
+            <div class="playlist-cover">
+              <el-image :src="playlist.coverUrl" alt="封面"/>
+              <div class="play-btn"/>
             </div>
-            <el-empty v-if="playlists.length === 0" description="暂无数据"/>
-          </el-scrollbar>
-        </el-tab-pane>
-        <el-tab-pane label="我的收藏" name="favorites">
-          <el-scrollbar height="auto">
-            <div class="playlist-grid">
-              <div
-                  v-for="playlist in favoritePlaylists"
-                  :key="playlist.id"
-                  class="playlist-item"
-                  @click="handleClick(playlist)"
-              >
-                <div class="playlist-cover">
-                  <el-image :src="playlist.coverUrl" alt="封面"/>
-                  <div class="play-btn"/>
-                </div>
-                <div class="like-info">
-                  <h3 class="playlist-title">{{ playlist.title }}</h3>
-                  <p class="playlist-desc">{{ playlist.introduction }}</p>
-                </div>
-              </div>
+            <div class="like-info">
+              <h3 class="playlist-title">{{ playlist.title }}</h3>
+              <p class="playlist-desc">{{ playlist.introduction }}</p>
+              <el-tag>{{ playlist.style }}</el-tag>
             </div>
-            <el-empty v-if="favoritePlaylists.length === 0" description="暂无数据"/>
-          </el-scrollbar>
-        </el-tab-pane>
-      </el-tabs>
+          </div>
+        </div>
+        <el-empty v-if="playlists.length === 0" description="暂无数据"/>
+      </el-scrollbar>
     </div>
 
     <!-- 分页 -->
-    <div class="pagination-section">
+    <div class="pagination-section" v-if="playlists.length !== 0">
       <el-pagination
           :current-page="currentPage"
           :page-size="pageSize"
@@ -104,6 +74,8 @@ import {getAllPlaylists} from "../api/manage.js";
 import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {fetchFavoritePlaylists} from "../utils/userFavorite.js";
+import {checkLogin} from "../utils/auth.js";
+import {message} from "../utils/message.js";
 
 const searchForm = reactive({
   title: null,
@@ -111,7 +83,6 @@ const searchForm = reactive({
   pageNum: 1,
   pageSize: 12
 })
-
 const styleOptions = [
   {
     label: "全部",
@@ -187,20 +158,14 @@ const styleOptions = [
   },
 ]
 const loading = ref(true)
-// 模拟数据
 const playlists = ref([])
 
-const favoritePlaylists = ref([])
-
-// 页面状态
-const activeTab = ref('recommended')
 const currentPage = ref(1)
 const pageSize = ref(12)
 const total = ref()
 const router = useRouter()
 const store = useStore()
 
-// 方法
 const handleSearch = () => {
   fetchPlaylists()
 }
@@ -213,22 +178,12 @@ const handleInputClear = () => {
 const handleStyleChange = (val) => {
   searchForm.styleId = val
   fetchPlaylists()
+
 }
 
 const handleStyleClear = () => {
   searchForm.styleId = null
   fetchPlaylists()
-}
-
-
-const handleTabChange = async (tab) => {
-  const name = tab.props.name
-  if (name === 'favorites') {
-    await fetchLikePlaylists();
-  }
-  if (name === 'recommended') {
-    await fetchPlaylists();
-  }
 }
 
 const handleSizeChange = (val) => {
@@ -258,13 +213,6 @@ const fetchPlaylists = async () => {
     playlists.value = res.data.data.records;
     total.value = res.data.data.total;
   }
-  loading.value = false;
-}
-
-const fetchLikePlaylists = async () => {
-  loading.value = true;
-  favoritePlaylists.value = await fetchFavoritePlaylists(store, null) || []
-  total.value = favoritePlaylists.value.length
   loading.value = false;
 }
 
@@ -298,14 +246,16 @@ onMounted(() => {
 }
 
 
-.tabs-section {
-  margin-bottom: 20px;
+.playlist-section {
+  margin-top: 50px;
+
 }
 
 .playlist-grid {
   display: grid;
   grid-template-columns: repeat(6, 1fr);
-  gap: 20px;
+  gap: 30px;
+  padding-right: 20px;
 }
 
 .playlist-item {
@@ -385,15 +335,10 @@ onMounted(() => {
   text-overflow: ellipsis;
 }
 
-.like-meta {
-  font-size: 12px;
-  color: #999;
-  margin: 0;
-}
 
 .pagination-section {
   display: flex;
   justify-content: center;
-  margin-top: 20px;
+  margin-top: 30px;
 }
 </style>

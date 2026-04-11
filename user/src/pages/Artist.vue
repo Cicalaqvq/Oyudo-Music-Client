@@ -98,10 +98,10 @@ const options = ref([
   {
     title: "歌手类型",
     index: 0,
-    selected: -1,
+    selected: null,
     option: [
       {
-        value: -1,
+        value: null,
         label: "全部",
       },
       {
@@ -121,10 +121,10 @@ const options = ref([
   {
     title: "地区类型",
     index: 1,
-    selected: -1,
+    selected: null,
     option: [
       {
-        value: -1,
+        value: null,
         label: "全部",
       },
       {
@@ -158,7 +158,7 @@ const page = ref({
 })
 const searchForm = reactive({
   name: null,
-  gender: -1,
+  gender: null,
   area: null,
   pageNum: 1,
   pageSize: 12,
@@ -181,11 +181,11 @@ const handleCurrentChange = (currentPage) => {
 }
 const resetFilters = () => {
   searchForm.name = null
-  searchForm.gender = -1
+  searchForm.gender = null
   searchForm.area = null
   searchForm.pageNum = 1
   options.value.forEach(item => {
-    item.selected = -1
+    item.selected = null
   })
   fetchArtists()
 }
