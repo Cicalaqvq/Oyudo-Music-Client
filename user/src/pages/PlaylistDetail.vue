@@ -2,18 +2,18 @@
   <div class="like-detail">
     <div class="like-header">
       <el-icon class="back-icon" size="24" @click="back">
-        <Back />
+        <Back/>
       </el-icon>
     </div>
     <!-- 歌单信息区域 -->
     <div class="playlist-info">
       <div class="like-avatar">
         <el-image
-          :alt="playlistData.title"
-          :preview-src-list="[playlistData.coverUrl]"
-          :show-progress="true"
-          :src="playlistData.coverUrl || defaultAvatar"
-          style="width: 100%; height: 100%; object-fit: cover"
+            :alt="playlistData.title"
+            :preview-src-list="[playlistData.coverUrl]"
+            :show-progress="true"
+            :src="playlistData.coverUrl || defaultAvatar"
+            style="width: 100%; height: 100%; object-fit: cover"
         />
       </div>
       <div class="like-content">
@@ -21,17 +21,17 @@
         <div class="like-meta">
           <p class="meta-item">
             <el-tooltip
-              v-if="playlistData.introduction"
-              :content="playlistData.introduction"
-              :disabled="isShowTooltip"
-              :offset="-500"
-              :popper-style="{ maxWidth: '550px' }"
-              effect="light"
-              placement="right"
+                v-if="playlistData.introduction"
+                :content="playlistData.introduction"
+                :disabled="isShowTooltip"
+                :offset="-500"
+                :popper-style="{ maxWidth: '550px' }"
+                effect="light"
+                placement="right"
             >
               <div
-                class="playlist-description"
-                @mouseenter="visibilityChange($event)"
+                  class="playlist-description"
+                  @mouseenter="visibilityChange($event)"
               >
                 {{ playlistData.introduction || "暂无简介" }}
               </div>
@@ -43,26 +43,26 @@
         </div>
         <div class="like-footer">
           <el-button
-            class="play-button"
-            style="width: 100px"
-            type="primary"
-            @click="playAll"
+              class="play-button"
+              style="width: 100px"
+              type="primary"
+              @click="playAll"
           >
             <span style="font-size: 12px">▷ 播放全部</span>
           </el-button>
           <el-button
-            class="like-button"
-            style="
+              class="like-button"
+              style="
               background-color: #d9d6d6;
               border-color: transparent;
               width: 40px;
             "
-            type="primary"
-            @click="toggleLikePlaylist"
+              type="primary"
+              @click="toggleLikePlaylist"
           >
             <el-icon class="like-icon" size="24">
-              <BiSolidHeart v-if="playlistData.isLike" style="color: red" />
-              <BiHeart v-else />
+              <BiSolidHeart v-if="playlistData.isLike" style="color: red"/>
+              <BiHeart v-else/>
             </el-icon>
           </el-button>
         </div>
@@ -76,43 +76,43 @@
           <div class="song-list">
             <el-scrollbar height="auto">
               <el-table
-                v-if="songs.length"
-                v-loading="tableLoading"
-                :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
-                :data="songs"
-                :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
-                :row-class-name="rowClassName"
-                :tooltip-options="{
+                  v-if="songs.length"
+                  v-loading="tableLoading"
+                  :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
+                  :data="songs"
+                  :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
+                  :row-class-name="rowClassName"
+                  :tooltip-options="{
                   placement: 'top',
                   offset: -20,
                   effect: 'light',
                 }"
-                element-loading-text="Loading..."
-                height="480"
-                style="width: 100%; font-size: 12px"
-                @row-dblclick="playSong"
+                  element-loading-text="Loading..."
+                  height="480"
+                  style="width: 100%; font-size: 12px"
+                  @row-dblclick="playSong"
               >
                 >
                 <el-table-column
-                  v-for="column in columns"
-                  :key="column.prop"
-                  :label="column.label"
-                  :prop="column.prop"
-                  :show-overflow-tooltip="true"
-                  :width="column.width || 'auto'"
+                    v-for="column in columns"
+                    :key="column.prop"
+                    :label="column.label"
+                    :prop="column.prop"
+                    :show-overflow-tooltip="true"
+                    :width="column.width || 'auto'"
                 >
                   <template #default="{ row }">
                     <template v-if="column.slot">
                       <div class="song-info">
                         <div class="song-cover">
                           <el-image
-                            :preview-src-list="[row.coverUrl]"
-                            :preview-teleported="true"
-                            :show-progress="true"
-                            :src="row.coverUrl"
-                            alt="Song"
-                            lazy
-                            style="width: 45px; height: 45px"
+                              :preview-src-list="[row.coverUrl]"
+                              :preview-teleported="true"
+                              :show-progress="true"
+                              :src="row.coverUrl"
+                              alt="Song"
+                              lazy
+                              style="width: 45px; height: 45px"
                           >
                           </el-image>
                         </div>
@@ -122,13 +122,13 @@
 
                     <template v-else-if="column.prop === 'like'">
                       <el-icon class="control-icon" @click="toggleLikeSong">
-                        <BiSolidHeart v-if="row.isLike" style="color: red" />
-                        <BiHeart v-else />
+                        <BiSolidHeart v-if="row.isLike" style="color: red"/>
+                        <BiHeart v-else/>
                       </el-icon>
                     </template>
                     <template v-else-if="column.prop === 'download'">
                       <el-icon class="control-icon" @click="downloadSong(row)">
-                        <BsCloudDownload />
+                        <BsCloudDownload/>
                       </el-icon>
                     </template>
                     <template v-else>
@@ -139,9 +139,9 @@
               </el-table>
 
               <el-empty
-                v-if="!songs.length && !tableLoading"
-                :image-size="200"
-                description="暂无数据"
+                  v-if="!songs.length && !tableLoading"
+                  :image-size="200"
+                  description="暂无数据"
               />
             </el-scrollbar>
           </div>
@@ -149,33 +149,43 @@
         <el-tab-pane label="评论" name="comments">
           <div class="comments-section">
             <h3 class="section-title">评论 ({{ comments.length }})</h3>
-            <div class="comment-input-wrapper">
-              <el-input
-                v-model="commentText"
-                :maxlength="180"
-                :rows="3"
-                placeholder="说点什么吧"
-                resize="none"
-                type="textarea"
-              />
-              <div class="input-footer">
-                <span class="char-count">{{ commentText.length }} / 180</span>
-                <el-button size="small" type="primary" @click="submitComment"
-                  >发布</el-button
-                >
-              </div>
-            </div>
-
-            <el-scrollbar height="300px">
+            <el-form ref="formRef" :model="commentForm" :rules="rules">
+              <el-form-item prop="content">
+                <div class="comment-input-wrapper">
+                  <el-input
+                      v-model="commentForm.content"
+                      :maxlength="180"
+                      :rows="3"
+                      clearable
+                      placeholder="说点什么吧"
+                      resize="none"
+                      type="textarea"
+                  />
+                  <div class="input-footer">
+                    <span class="char-count"
+                    >{{ commentForm.content.length }} / 180</span
+                    >
+                    <el-button
+                        size="small"
+                        type="primary"
+                        @click="submitComment"
+                    >发布
+                    </el-button
+                    >
+                  </div>
+                </div>
+              </el-form-item>
+            </el-form>
+            <el-scrollbar height="500px">
               <div
-                v-for="comment in comments"
-                :key="comment.id"
-                class="comment-item"
+                  v-for="comment in comments"
+                  :key="comment.id"
+                  class="comment-item"
               >
                 <el-image
-                  :alt="comment.username"
-                  :src="comment.userAvatar || '/defaultAvatar.png'"
-                  class="comment-avatar"
+                    :alt="comment.username"
+                    :src="comment.userAvatar || '/defaultAvatar.png'"
+                    class="comment-avatar"
                 />
                 <div class="comment-content">
                   <div class="comment-header">
@@ -186,10 +196,10 @@
                     <span class="comment-date">{{ comment.createTime }}</span>
                     <div class="comment-actions">
                       <el-icon
-                        class="action-icon"
-                        @click="likeComment(comment.id)"
+                          class="action-icon"
+                          @click="likeComment(comment.id)"
                       >
-                        <BiHeart />
+                        <BiHeart/>
                       </el-icon>
                       <span class="likes-count">{{ comment.likeCount }}</span>
                     </div>
@@ -197,8 +207,8 @@
                 </div>
               </div>
               <el-empty
-                v-if="comments.length === 0"
-                description="暂无评论，快来抢沙发~"
+                  v-if="comments.length === 0"
+                  description="暂无评论，快来抢沙发~"
               />
             </el-scrollbar>
           </div>
@@ -209,25 +219,20 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
-import { useStore } from "vuex";
-import { BiHeart, BiSolidHeart } from "vue-icons-plus/bi";
-import { BsCloudDownload } from "vue-icons-plus/bs";
-import { message } from "../utils/message.js";
-import { useRoute } from "vue-router";
-import {
-  getCommentOfPlaylist,
-  getPlaylistDetail,
-  getSongsOfPlaylist,
-} from "../api/manage.js";
-import { formatDate } from "@vueuse/core";
+import {onMounted, reactive, ref} from "vue";
+import {useStore} from "vuex";
+import {BiHeart, BiSolidHeart} from "vue-icons-plus/bi";
+import {BsCloudDownload} from "vue-icons-plus/bs";
+import {message} from "../utils/message.js";
+import {useRoute} from "vue-router";
+import {getPlaylistDetail, getSongsOfPlaylist,} from "../api/manage.js";
 import {
   fetchFavoritePlaylists,
   fetchFavoriteSongs,
   toggleFavoritePlaylist,
   toggleFavoriteSong,
 } from "../utils/userFavorite.js";
-import { fetchPlaylistComments } from "../utils/userComment.js";
+import {fetchPlaylistComments, publishComment, toggleFavoriteComment} from "../utils/userComment.js";
 
 const isShowTooltip = ref(false);
 const routes = useRoute();
@@ -243,8 +248,27 @@ const playlistData = reactive({
   id: routes.params.id,
 });
 
+const commentForm = reactive({
+  playlistId: routes.params.id,
+  content: "",
+  type: 1,
+});
 const comments = ref([]);
-const commentText = ref("");
+
+const formRef = ref(null);
+
+const rules = {
+  content: [
+    {required: true, message: "请输入评论内容", trigger: "change"},
+    {
+      min: 1,
+      max: 180,
+      message: "评论长度在 1 到 180 个字符",
+      trigger: "blur",
+    },
+  ],
+};
+
 
 // 歌曲列表
 const songs = ref([]);
@@ -285,7 +309,8 @@ const back = () => {
 };
 
 const likeComment = async (commentId) => {
-  // TODO: 调用 API 喜欢评论
+  const res = await toggleFavoriteComment(store, commentId);
+  if (res) await fetchComments();
 };
 
 const handleTabChange = (tab) => {
@@ -319,10 +344,18 @@ const toggleLikeSong = async (row) => {
 // 切换歌单喜欢状态
 const toggleLikePlaylist = async () => {
   playlistData.isLike = await toggleFavoritePlaylist(
-    store,
-    [playlistData.id],
-    playlistData.isLike,
+      store,
+      [playlistData.id],
+      playlistData.isLike,
   );
+};
+
+const submitComment = async () => {
+  const res = await publishComment(store, commentForm);
+  if (res) {
+    commentForm.content = "";
+    await fetchComments();
+  }
 };
 
 // 下载歌曲
@@ -355,7 +388,7 @@ const fetchPlaylistDetail = async () => {
   }
   playlistData.title = store.state.SELECTED_PLAYLIST.title;
   playlistData.coverUrl =
-    store.state.SELECTED_PLAYLIST.coverUrl || defaultAvatar;
+      store.state.SELECTED_PLAYLIST.coverUrl || defaultAvatar;
   playlistData.introduction = store.state.SELECTED_PLAYLIST.introduction;
   playlistData.style = store.state.SELECTED_PLAYLIST.style;
   const favoritePlaylist = await fetchFavoritePlaylists(store, [
@@ -372,11 +405,11 @@ const fetchPlaylistSongs = async () => {
     songs.value = res.data.data;
     songs.value.forEach((song) => {
       song.duration =
-        Math.floor(song.duration / 60) +
-        ":" +
-        (Math.floor(song.duration % 60) < 10
-          ? "0" + Math.floor(song.duration % 60)
-          : Math.floor(song.duration % 60));
+          Math.floor(song.duration / 60) +
+          ":" +
+          (Math.floor(song.duration % 60) < 10
+              ? "0" + Math.floor(song.duration % 60)
+              : Math.floor(song.duration % 60));
     });
   }
   await fetchLikeSongs();
@@ -386,14 +419,6 @@ const fetchPlaylistSongs = async () => {
 // 获取歌单评论
 const fetchComments = async () => {
   comments.value = (await fetchPlaylistComments(playlistData.id)) || [];
-  if (comments.value.length > 0) {
-    comments.value.forEach((comment) => {
-      comment.createTime = formatDate(
-        new Date(comment.createTime),
-        "YYYY年MM月DD日 HH:mm:ss",
-      );
-    });
-  }
 };
 
 // 获取用户收藏的歌单歌曲
@@ -401,8 +426,8 @@ const fetchLikeSongs = async () => {
   const favoriteSongs = await fetchFavoriteSongs(store, []);
   songs.value.forEach((song) => {
     song.isLike =
-      favoriteSongs.find((favoriteSong) => favoriteSong.id === song.id) ||
-      false;
+        favoriteSongs.find((favoriteSong) => favoriteSong.id === song.id) ||
+        false;
   });
 };
 
@@ -578,6 +603,7 @@ onMounted(() => {
 
 .comment-input-wrapper {
   margin-bottom: 10px;
+  width: 100%;
 }
 
 .input-footer {

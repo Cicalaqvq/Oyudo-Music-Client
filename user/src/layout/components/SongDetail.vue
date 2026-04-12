@@ -5,10 +5,10 @@
       <div class="top-section">
         <div>
           <el-icon class="back-icon" size="24" @click="back">
-            <Back />
+            <Back/>
           </el-icon>
         </div>
-        <div />
+        <div/>
       </div>
     </el-row>
     <!-- 左侧：歌曲信息和播放控制 -->
@@ -16,13 +16,13 @@
       <el-col :span="10">
         <div class="left-section">
           <div class="cover-wrapper">
-            <img :src="currentSong.coverUrl" alt="cover" class="song-cover" />
+            <img :src="currentSong.coverUrl" alt="cover" class="song-cover"/>
             <div
-              :class="{ 'vinyl-record_active': localIsPlaying }"
-              class="vinyl-record"
+                :class="{ 'vinyl-record_active': localIsPlaying }"
+                class="vinyl-record"
             >
               <div class="vinyl-inner">
-                <el-image :src="currentSong.coverUrl" class="vinyl-image" />
+                <el-image :src="currentSong.coverUrl" class="vinyl-image"/>
               </div>
             </div>
           </div>
@@ -35,59 +35,59 @@
           <div class="progress-section">
             <span class="time-text">{{ formatTime(currentTime) }}</span>
             <el-slider
-              v-model="localCurrentTime"
-              :max="duration"
-              :show-tooltip="false"
-              :step="1"
-              class="progress-slider"
-              @change="onProgressChange"
+                v-model="localCurrentTime"
+                :max="duration"
+                :show-tooltip="false"
+                :step="1"
+                class="progress-slider"
+                @change="onProgressChange"
             />
             <span class="time-text">{{ currentSong.duration }}</span>
           </div>
 
           <div class="player-controls">
             <el-icon class="control-icon" size="35" @click="previousSong">
-              <BiSkipPrevious />
+              <BiSkipPrevious/>
             </el-icon>
             <div class="play-btn" @click="togglePlay">
               <el-icon v-if="!localIsPlaying" size="40">
-                <BiPlay />
+                <BiPlay/>
               </el-icon>
               <el-icon v-else size="40">
-                <BiPause />
+                <BiPause/>
               </el-icon>
             </div>
             <el-icon class="control-icon" size="35" @click="nextSong">
-              <BiSkipNext />
+              <BiSkipNext/>
             </el-icon>
             <el-icon class="control-icon" size="30" @click="toggleFavorite">
-              <BiSolidHeart v-if="isFavorite" style="color: red" />
-              <BiHeart v-else />
+              <BiSolidHeart v-if="isFavorite" style="color: red"/>
+              <BiHeart v-else/>
             </el-icon>
             <el-tooltip :content="showPlayMode()" effect="light">
               <el-icon
-                v-if="localPlayMode === 0"
-                class="control-icon"
-                size="30"
-                @click="onPlayModeChange"
+                  v-if="localPlayMode === 0"
+                  class="control-icon"
+                  size="30"
+                  @click="onPlayModeChange"
               >
-                <AiOutlineUnorderedList />
+                <AiOutlineUnorderedList/>
               </el-icon>
               <el-icon
-                v-if="localPlayMode === 1"
-                class="control-icon"
-                size="30"
-                @click="onPlayModeChange"
+                  v-if="localPlayMode === 1"
+                  class="control-icon"
+                  size="30"
+                  @click="onPlayModeChange"
               >
-                <LiaRandomSolid />
+                <LiaRandomSolid/>
               </el-icon>
               <el-icon
-                v-if="localPlayMode === 2"
-                class="control-icon"
-                size="30"
-                @click="onPlayModeChange"
+                  v-if="localPlayMode === 2"
+                  class="control-icon"
+                  size="30"
+                  @click="onPlayModeChange"
               >
-                <IpPlayCycle />
+                <IpPlayCycle/>
               </el-icon>
             </el-tooltip>
           </div>
@@ -106,8 +106,8 @@
               <div class="meta-item">
                 <span class="label">发行时间：</span>
                 <span class="value">{{
-                  formateDate(currentSong.releaseTime)
-                }}</span>
+                    formateDate(currentSong.releaseTime)
+                  }}</span>
               </div>
             </div>
           </div>
@@ -118,23 +118,24 @@
               <el-form-item prop="content">
                 <div class="comment-input-wrapper">
                   <el-input
-                    v-model="commentForm.content"
-                    :maxlength="180"
-                    :rows="3"
-                    clearable
-                    placeholder="说点什么吧"
-                    resize="none"
-                    type="textarea"
+                      v-model="commentForm.content"
+                      :maxlength="180"
+                      :rows="3"
+                      clearable
+                      placeholder="说点什么吧"
+                      resize="none"
+                      type="textarea"
                   />
                   <div class="input-footer">
                     <span class="char-count"
-                      >{{ commentForm.content.length }} / 180</span
+                    >{{ commentForm.content.length }} / 180</span
                     >
                     <el-button
-                      size="small"
-                      type="primary"
-                      @click="submitComment"
-                      >发布</el-button
+                        size="small"
+                        type="primary"
+                        @click="submitComment"
+                    >发布
+                    </el-button
                     >
                   </div>
                 </div>
@@ -142,14 +143,14 @@
             </el-form>
             <el-scrollbar height="500px">
               <div
-                v-for="comment in comments"
-                :key="comment.id"
-                class="comment-item"
+                  v-for="comment in comments"
+                  :key="comment.id"
+                  class="comment-item"
               >
                 <el-image
-                  :alt="comment.username"
-                  :src="comment.userAvatar || '/defaultAvatar.png'"
-                  class="comment-avatar"
+                    :alt="comment.username"
+                    :src="comment.userAvatar || '/defaultAvatar.png'"
+                    class="comment-avatar"
                 />
                 <div class="comment-content">
                   <div class="comment-header">
@@ -160,10 +161,10 @@
                     <span class="comment-date">{{ comment.createTime }}</span>
                     <div class="comment-actions">
                       <el-icon
-                        class="action-icon"
-                        @click="likeComment(comment.id)"
+                          class="action-icon"
+                          @click="likeComment(comment.id)"
                       >
-                        <BiHeart />
+                        <BiHeart/>
                       </el-icon>
                       <span class="likes-count">{{ comment.likeCount }}</span>
                     </div>
@@ -171,8 +172,8 @@
                 </div>
               </div>
               <el-empty
-                v-if="comments.length === 0"
-                description="暂无评论，快来抢沙发~"
+                  v-if="comments.length === 0"
+                  description="暂无评论，快来抢沙发~"
               />
             </el-scrollbar>
           </div>
@@ -182,23 +183,13 @@
   </div>
 </template>
 <script setup>
-import { computed, reactive, ref, watch } from "vue";
-import {
-  BiHeart,
-  BiPause,
-  BiPlay,
-  BiSkipNext,
-  BiSkipPrevious,
-  BiSolidHeart,
-} from "vue-icons-plus/bi";
-import { useStore } from "vuex";
-import { AiOutlineUnorderedList } from "vue-icons-plus/ai";
-import { LiaRandomSolid } from "vue-icons-plus/lia";
-import { IpPlayCycle } from "vue-icons-plus/ip";
-import {
-  publishComment,
-  toggleFavoriteComment,
-} from "../../utils/userComment.js";
+import {computed, reactive, ref, watch} from "vue";
+import {BiHeart, BiPause, BiPlay, BiSkipNext, BiSkipPrevious, BiSolidHeart,} from "vue-icons-plus/bi";
+import {useStore} from "vuex";
+import {AiOutlineUnorderedList} from "vue-icons-plus/ai";
+import {LiaRandomSolid} from "vue-icons-plus/lia";
+import {IpPlayCycle} from "vue-icons-plus/ip";
+import {publishComment, toggleFavoriteComment,} from "../../utils/userComment.js";
 
 const store = useStore();
 
@@ -238,14 +229,15 @@ const localPlayMode = computed(() => store.state.PLAY_MODE || 0);
 
 const commentForm = reactive({
   content: "",
-  songId: null,
+  songId: store.state.CURRENT_SONG.id,
+  type: 0,
 });
 
 const formRef = ref(null);
 
 const rules = {
   content: [
-    { required: true, message: "请输入评论内容", trigger: "change" },
+    {required: true, message: "请输入评论内容", trigger: "change"},
     {
       min: 1,
       max: 180,
@@ -289,7 +281,7 @@ const onProgressChange = (value) => {
 };
 
 const formateDate = (date) => {
-  const options = { year: "numeric", month: "long", day: "numeric" };
+  const options = {year: "numeric", month: "long", day: "numeric"};
   return new Date(date).toLocaleDateString(undefined, options);
 };
 
@@ -317,7 +309,10 @@ const nextSong = () => {
 
 const submitComment = async () => {
   const res = await publishComment(store, commentForm);
-  if (res) fetchComments();
+  if (res) {
+    commentForm.content = "";
+    fetchComments();
+  }
 };
 
 const likeComment = async (id) => {
@@ -330,10 +325,10 @@ const fetchComments = () => {
 };
 
 watch(
-  () => props.currentTime,
-  (newVal) => {
-    localCurrentTime.value = newVal;
-  },
+    () => props.currentTime,
+    (newVal) => {
+      localCurrentTime.value = newVal;
+    },
 );
 </script>
 

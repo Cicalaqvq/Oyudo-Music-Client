@@ -4,18 +4,18 @@
       <!-- 左侧：歌曲信息 -->
       <div class="song-info">
         <el-image
-          :src="localCurrentSong.coverUrl || '/defaultSongCover.png'"
-          alt="songCover"
-          class="song-cover"
-          @click="showSongDetail"
+            :src="localCurrentSong.coverUrl || '/defaultSongCover.png'"
+            alt="songCover"
+            class="song-cover"
+            @click="showSongDetail"
         />
         <div class="song-text">
           <el-tooltip
-            :content="localCurrentSong.name"
-            :disabled="!isShowTooltip"
-            effect="light"
-            placement="top"
-            trigger="hover"
+              :content="localCurrentSong.name"
+              :disabled="!isShowTooltip"
+              effect="light"
+              placement="top"
+              trigger="hover"
           >
             <div class="song-title" @mouseenter="visibilityChange($event)">
               {{ localCurrentSong.name || "暂未播放歌曲" }}
@@ -23,11 +23,11 @@
           </el-tooltip>
 
           <el-tooltip
-            :content="localCurrentSong.artistName"
-            :disabled="!isShowTooltip"
-            effect="light"
-            placement="right"
-            trigger="hover"
+              :content="localCurrentSong.artistName"
+              :disabled="!isShowTooltip"
+              effect="light"
+              placement="right"
+              trigger="hover"
           >
             <div class="song-artist" @mouseenter="visibilityChange($event)">
               {{ localCurrentSong.artistName || "Various Artists" }}
@@ -40,33 +40,33 @@
       <div class="player-controls">
         <div class="control-buttons">
           <el-icon class="control-icon" size="35" @click="previousSong">
-            <BiSkipPrevious />
+            <BiSkipPrevious/>
           </el-icon>
           <div class="play-btn" @click="togglePlay">
             <el-icon v-if="!localIsPlaying">
-              <BiPlay />
+              <BiPlay/>
             </el-icon>
             <el-icon v-else>
-              <BiPause />
+              <BiPause/>
             </el-icon>
           </div>
           <el-icon class="control-icon" size="35" @click="nextSong">
-            <BiSkipNext />
+            <BiSkipNext/>
           </el-icon>
           <el-icon class="control-icon" @click="toggleFavorite">
-            <BiSolidHeart v-if="isFavorite" style="color: red" />
-            <BiHeart v-else />
+            <BiSolidHeart v-if="isFavorite" style="color: red"/>
+            <BiHeart v-else/>
           </el-icon>
         </div>
         <div class="progress-container">
           <span class="time-text">{{ formatTime(currentTime) }}</span>
           <el-slider
-            v-model="currentTime"
-            :max="duration"
-            :show-tooltip="false"
-            :step="1"
-            class="progress-slider"
-            @change="onProgressChange"
+              v-model="currentTime"
+              :max="duration"
+              :show-tooltip="false"
+              :step="1"
+              class="progress-slider"
+              @change="onProgressChange"
           />
           <span class="time-text">{{ formatTime(duration) }}</span>
         </div>
@@ -76,53 +76,53 @@
       <div class="right-controls">
         <el-tooltip :content="showPlayMode()" effect="light">
           <el-icon
-            v-if="localPlayMode === 0"
-            class="control-icon"
-            @click="onPlayModeChange"
+              v-if="localPlayMode === 0"
+              class="control-icon"
+              @click="onPlayModeChange"
           >
-            <AiOutlineUnorderedList />
+            <AiOutlineUnorderedList/>
           </el-icon>
           <el-icon
-            v-if="localPlayMode === 1"
-            class="control-icon"
-            @click="onPlayModeChange"
+              v-if="localPlayMode === 1"
+              class="control-icon"
+              @click="onPlayModeChange"
           >
-            <LiaRandomSolid />
+            <LiaRandomSolid/>
           </el-icon>
           <el-icon
-            v-if="localPlayMode === 2"
-            class="control-icon"
-            @click="onPlayModeChange"
+              v-if="localPlayMode === 2"
+              class="control-icon"
+              @click="onPlayModeChange"
           >
-            <IpPlayCycle />
+            <IpPlayCycle/>
           </el-icon>
         </el-tooltip>
         <div class="volume-control">
           <el-tooltip
-            :content="localVolume ? `点击静音` : '点击取消静音'"
-            effect="light"
+              :content="localVolume ? `点击静音` : '点击取消静音'"
+              effect="light"
           >
             <el-icon v-if="localVolume > 0" class="control-icon" @click="mute">
-              <BiSolidVolumeFull />
+              <BiSolidVolumeFull/>
             </el-icon>
             <el-icon v-else class="control-icon" @click="resetLastVolume">
-              <BiSolidVolumeMute />
+              <BiSolidVolumeMute/>
             </el-icon>
           </el-tooltip>
           <el-slider
-            v-model="store.state.VOLUME"
-            :max="100"
-            :step="1"
-            class="volume-slider"
-            height="10"
-            @input="onVolumeChange"
+              v-model="store.state.VOLUME"
+              :max="100"
+              :step="1"
+              class="volume-slider"
+              height="10"
+              @input="onVolumeChange"
           />
         </div>
         <!-- 播放列表 --->
         <el-popover placement="top" trigger="click" width="400">
           <template #reference>
             <el-icon class="control-icon">
-              <RiPlayList2Fill />
+              <RiPlayList2Fill/>
             </el-icon>
           </template>
           <template #default>
@@ -130,29 +130,30 @@
               <div class="popover-title">播放列表</div>
               <div>
                 <el-popover
-                  :visible="popoverVisible"
-                  :width="180"
-                  placement="top"
+                    :visible="popoverVisible"
+                    :width="180"
+                    placement="top"
                 >
                   <p>确定要删除播放列表中的所有歌曲吗？</p>
                   <div style="text-align: right; margin: 0">
                     <el-button size="small" text @click="popoverVisible = false"
-                      >取消</el-button
+                    >取消
+                    </el-button
                     >
                     <el-button
-                      size="small"
-                      type="primary"
-                      @click="deleteUserPlaylist"
+                        size="small"
+                        type="primary"
+                        @click="deleteUserPlaylist"
                     >
                       确定
                     </el-button>
                   </div>
                   <template #reference>
                     <el-icon
-                      class="control-icon"
-                      @click="popoverVisible = true"
+                        class="control-icon"
+                        @click="popoverVisible = true"
                     >
-                      <Delete />
+                      <Delete/>
                     </el-icon>
                   </template>
                 </el-popover>
@@ -160,18 +161,18 @@
             </div>
             <el-scrollbar height="500px">
               <div
-                v-for="song in store.state.TRACK_LIST"
-                v-if="store.state.TRACK_LIST.length"
-                :key="song.id"
-                :class="{ 'song-item_active': song.id === localCurrentSong.id }"
-                class="song-item"
+                  v-for="song in store.state.TRACK_LIST"
+                  v-if="store.state.TRACK_LIST.length"
+                  :key="song.id"
+                  :class="{ 'song-item_active': song.id === localCurrentSong.id }"
+                  class="song-item"
               >
                 <el-image
-                  :alt="song.name"
-                  :src="song.coverUrl"
-                  class="song-item-cover"
-                  style="width: 64px; height: 64px"
-                  @click="playSong(song)"
+                    :alt="song.name"
+                    :src="song.coverUrl"
+                    class="song-item-cover"
+                    style="width: 64px; height: 64px"
+                    @click="playSong(song)"
                 />
                 <div class="song-item-info">
                   <div class="song-item-title">{{ song.name }}</div>
@@ -180,11 +181,11 @@
                 <div class="song-item-duration">{{ song.duration }}</div>
                 <div class="song-item-delete">
                   <el-icon class="control-icon" @click="deleteSong(song)">
-                    <Delete />
+                    <Delete/>
                   </el-icon>
                 </div>
               </div>
-              <el-empty v-else description="空空如也，先去选择歌曲吧" />
+              <el-empty v-else description="空空如也，先去选择歌曲吧"/>
             </el-scrollbar>
           </template>
         </el-popover>
@@ -193,33 +194,33 @@
 
     <!-- 隐藏的 audio 元素 -->
     <audio
-      ref="audioRef"
-      :src="localCurrentSong.audioUrl"
-      @ended="onEnded"
-      @loadedmetadata="onLoadedMetadata"
-      @timeupdate="onTimeUpdate"
+        ref="audioRef"
+        :src="localCurrentSong.audioUrl"
+        @ended="onEnded"
+        @loadedmetadata="onLoadedMetadata"
+        @timeupdate="onTimeUpdate"
     />
 
     <!-- 歌曲详情抽屉 -->
     <el-drawer
-      v-model="drawerVisible"
-      :withHeader="false"
-      direction="btt"
-      size="100%"
+        v-model="drawerVisible"
+        :withHeader="false"
+        direction="btt"
+        size="100%"
     >
       <SongDetail
-        :comments="comments"
-        :currentTime="currentTime"
-        :duration="duration"
-        :isFavorite="isFavorite"
-        @back="drawerVisible = false"
-        @next="nextSong"
-        @pause="togglePlay"
-        @play="togglePlay"
-        @previous="previousSong"
-        @on-progress-change="onProgressChange"
-        @toggle-favorite="toggleFavorite"
-        @fetch-comments="fetchComments"
+          :comments="comments"
+          :currentTime="currentTime"
+          :duration="duration"
+          :isFavorite="isFavorite"
+          @back="drawerVisible = false"
+          @next="nextSong"
+          @pause="togglePlay"
+          @play="togglePlay"
+          @previous="previousSong"
+          @on-progress-change="onProgressChange"
+          @toggle-favorite="toggleFavorite"
+          @fetch-comments="fetchComments"
       />
 
       /> />
@@ -228,8 +229,8 @@
 </template>
 
 <script setup>
-import { computed, nextTick, ref, watchEffect } from "vue";
-import { Delete } from "@element-plus/icons-vue";
+import {computed, nextTick, ref, watchEffect} from "vue";
+import {Delete} from "@element-plus/icons-vue";
 import {
   BiHeart,
   BiPause,
@@ -240,18 +241,15 @@ import {
   BiSolidVolumeFull,
   BiSolidVolumeMute,
 } from "vue-icons-plus/bi";
-import { AiOutlineUnorderedList } from "vue-icons-plus/ai";
-import { RiPlayList2Fill } from "vue-icons-plus/ri";
-import { IpPlayCycle } from "vue-icons-plus/ip";
-import { LiaRandomSolid } from "vue-icons-plus/lia";
-import { useStore } from "vuex";
-import { message } from "../../utils/message.js";
+import {AiOutlineUnorderedList} from "vue-icons-plus/ai";
+import {RiPlayList2Fill} from "vue-icons-plus/ri";
+import {IpPlayCycle} from "vue-icons-plus/ip";
+import {LiaRandomSolid} from "vue-icons-plus/lia";
+import {useStore} from "vuex";
+import {message} from "../../utils/message.js";
 import SongDetail from "./SongDetail.vue";
-import {
-  fetchFavoriteSongs,
-  toggleFavoriteSong,
-} from "../../utils/userFavorite.js";
-import { fetchSongComments } from "../../utils/userComment.js";
+import {fetchFavoriteSongs, toggleFavoriteSong,} from "../../utils/userFavorite.js";
+import {fetchSongComments} from "../../utils/userComment.js";
 
 const store = useStore();
 const popoverVisible = ref(false);
@@ -325,7 +323,7 @@ const showSongDetail = () => {
 };
 
 const fetchComments = async () => {
-  comments.value = await fetchSongComments(localCurrentSong.value.id);
+  comments.value = await fetchSongComments(localCurrentSong.value.id) || [];
 };
 
 // 播放歌曲
@@ -401,14 +399,15 @@ const nextSong = () => {
     fetchFavorite();
   }
   audioRef.value.currentTime = 0;
+  audioRef.value.play();
 };
 
 // 切换收藏
 const toggleFavorite = async () => {
   isFavorite.value = await toggleFavoriteSong(
-    store,
-    [store.state.CURRENT_SONG.id],
-    isFavorite.value,
+      store,
+      [store.state.CURRENT_SONG.id],
+      isFavorite.value,
   );
 };
 

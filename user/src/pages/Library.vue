@@ -1,40 +1,43 @@
 <template>
   <div class="library-container">
-    <div class="header-section">双击对应行即可播放该歌曲！</div>
+    <div class="header-section">
+      <div v-if="searchQuery">搜索结果：{{ searchQuery }}</div>
+      <span>双击对应行即可播放该歌曲！</span>
+    </div>
     <el-scrollbar height="auto">
       <el-table
-        v-if="songs.length"
-        v-loading="tableLoading"
-        :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
-        :data="songs"
-        :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
-        :row-class-name="rowClassName"
-        :tooltip-options="{ placement: 'top', offset: '-20' }"
-        element-loading-text="Loading..."
-        height="670"
-        style="width: 100%; font-size: 12px"
-        @row-dblclick="playSong"
+          v-if="songs.length"
+          v-loading="tableLoading"
+          :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
+          :data="songs"
+          :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
+          :row-class-name="rowClassName"
+          :tooltip-options="{ placement: 'top', offset: '-20' }"
+          element-loading-text="Loading..."
+          height="670"
+          style="width: 100%; font-size: 12px"
+          @row-dblclick="playSong"
       >
         >
         <el-table-column
-          v-for="column in columns"
-          :key="column.prop"
-          :label="column.label"
-          :prop="column.prop"
-          :show-overflow-tooltip="true"
-          :width="column.width || 'auto'"
+            v-for="column in columns"
+            :key="column.prop"
+            :label="column.label"
+            :prop="column.prop"
+            :show-overflow-tooltip="true"
+            :width="column.width || 'auto'"
         >
           <template #default="{ row }">
             <template v-if="column.slot">
               <div class="song-info">
                 <div class="song-cover">
                   <el-image
-                    :preview-src-list="[row.coverUrl]"
-                    :preview-teleported="true"
-                    :show-progress="true"
-                    :src="row.coverUrl"
-                    alt="Song"
-                    style="width: 45px; height: 45px"
+                      :preview-src-list="[row.coverUrl]"
+                      :preview-teleported="true"
+                      :show-progress="true"
+                      :src="row.coverUrl"
+                      alt="Song"
+                      style="width: 45px; height: 45px"
                   >
                   </el-image>
                 </div>
@@ -44,13 +47,13 @@
 
             <template v-else-if="column.prop === 'like'">
               <el-icon class="control-icon" @click="toggleFavorite(row)">
-                <BiSolidHeart v-if="row.isLiked || false" style="color: red" />
-                <BiHeart v-else />
+                <BiSolidHeart v-if="row.isLiked || false" style="color: red"/>
+                <BiHeart v-else/>
               </el-icon>
             </template>
             <template v-else-if="column.prop === 'download'">
               <el-icon class="control-icon" @click="handleDownload(row)">
-                <BsCloudDownload />
+                <BsCloudDownload/>
               </el-icon>
             </template>
             <template v-else>
@@ -61,39 +64,39 @@
       </el-table>
 
       <el-empty
-        v-if="!songs.length && !tableLoading"
-        :image-size="200"
-        description="暂无数据"
+          v-if="!songs.length && !tableLoading"
+          :image-size="200"
+          description="暂无数据"
       />
     </el-scrollbar>
     <!-- 分页 -->
     <div class="table-footer">
       <el-pagination
-        :current-page="page.currentPage"
-        :page-size="searchForm.pageSize"
-        :page-sizes="[50, 100, 150, 200]"
-        :total="page.total"
-        layout="total, sizes, prev, pager, next, jumper"
-        @size-change="handleSizeChange"
-        @current-change="handlePageChange"
+          :current-page="page.currentPage"
+          :page-size="searchForm.pageSize"
+          :page-sizes="[50, 100, 150, 200]"
+          :total="page.total"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="handleSizeChange"
+          @current-change="handlePageChange"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
-import { getAllSongs } from "../api/manage.js";
-import { useStore } from "vuex";
-import { BiHeart, BiSolidHeart } from "vue-icons-plus/bi";
-import { BsCloudDownload } from "vue-icons-plus/bs";
-import { message } from "../utils/message.js";
-import {
-  fetchFavoriteSongs,
-  toggleFavoriteSong,
-} from "../utils/userFavorite.js";
+import {onMounted, reactive, ref, watch} from "vue";
+import {getAllSongs} from "../api/manage.js";
+import {useStore} from "vuex";
+import {BiHeart, BiSolidHeart} from "vue-icons-plus/bi";
+import {BsCloudDownload} from "vue-icons-plus/bs";
+import {message} from "../utils/message.js";
+import {fetchFavoriteSongs, toggleFavoriteSong,} from "../utils/userFavorite.js";
+import {useRoute} from "vue-router";
 
 const store = useStore();
+
+const route = useRoute();
 
 const tableLoading = ref(true);
 
@@ -133,6 +136,8 @@ const columns = [
     width: 100,
   },
 ];
+
+const searchQuery = ref(route.query.name || "");
 
 const searchForm = reactive({
   pageNum: 1,
@@ -175,33 +180,33 @@ const playSong = (row) => {
 
 const fetchSongs = async () => {
   tableLoading.value = true;
-  getAllSongs(searchForm)
-    .then((res) => {
-      if (res.data.code === 200) {
-        songs.value = res.data.data.records;
-        songs.value.forEach((song) => {
-          const minutes = Math.floor(song.duration / 60);
-          const seconds = Math.floor(song.duration % 60);
-          song.duration =
-            minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
-        });
-        page.total = res.data.data.total;
-        fetchFavorite();
-      }
-    })
-    .finally(() => {
-      tableLoading.value = false;
-    });
+  console.log(searchForm)
+  await getAllSongs(searchForm)
+      .then((res) => {
+        if (res.data.code === 200) {
+          songs.value = res.data.data.records;
+          songs.value.forEach((song) => {
+            const minutes = Math.floor(song.duration / 60);
+            const seconds = Math.floor(song.duration % 60);
+            song.duration =
+                minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+          });
+          page.total = res.data.data.total;
+          fetchFavorite();
+        }
+      })
+      .finally(() => {
+        tableLoading.value = false;
+      });
 };
 
 const fetchFavorite = async () => {
   const favoriteSongs = await fetchFavoriteSongs(store);
   if (favoriteSongs) {
-    console.log(favoriteSongs);
     songs.value.forEach((song) => {
       song.isLiked =
-        favoriteSongs.find((favoriteSong) => favoriteSong.id === song.id) ||
-        false;
+          favoriteSongs.find((favoriteSong) => favoriteSong.id === song.id) ||
+          false;
     });
   }
 };
@@ -220,6 +225,14 @@ const handlePageChange = (val) => {
 onMounted(() => {
   fetchSongs();
 });
+
+watch(() => route.query.name, (newVal) => {
+  searchQuery.value = newVal;
+  searchForm.name = newVal;
+  searchForm.pageNum = 1;
+  searchForm.pageSize = 50;
+  fetchSongs();
+})
 </script>
 <style scoped>
 .library-container {
@@ -227,7 +240,9 @@ onMounted(() => {
 }
 
 .header-section {
-  margin-bottom: 10px;
+  padding: 10px;
+  font-size: 15px;
+  font-weight: bold;
 }
 
 .control-icon {
@@ -269,13 +284,14 @@ onMounted(() => {
   display: flex;
   justify-content: center;
   text-align: center;
-  margin-top: 20px;
+  margin-top: 10px;
+  padding-bottom: 10px;
   position: relative;
-  z-index: 1001;
+  z-index: 1;
 }
 
-:deep(.el-table__inner-wrapper) :before {
-  background-color: white;
+:deep(.el-table__inner-wrapper:before) {
+  background-color: transparent;
   position: relative;
 }
 </style>

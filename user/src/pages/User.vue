@@ -6,45 +6,37 @@
       </div>
     </template>
     <el-form
-      :model="userForm"
-      ref="userFormRef"
-      :rules="userFormRules"
-      label-position="top"
+        :model="userForm"
+        ref="userFormRef"
+        :rules="userFormRules"
+        label-position="top"
     >
       <el-form-item label="头像" prop="userAvatar">
-        <el-upload
-          :before-upload="beforeAvatarUpload"
-          :on-success="handleAvatarSuccess"
-          :show-file-list="false"
-          class="avatar-uploader"
-        >
-          <el-image
-            v-if="userForm.userAvatar"
-            :src="userForm.userAvatar"
+        <el-image
+            :src="userForm.userAvatar || '/defaultAvatar.png'"
             fit="cover"
             style="width: 100px; height: 100px"
-          />
-          <el-image v-else :src="defaultAvatar" />
-        </el-upload>
+        />
+        <el-button @click="openCropper">更换头像</el-button>
       </el-form-item>
       <el-form-item label="用户名" prop="username">
-        <el-input v-model="userForm.username" placeholder="请输入用户名" />
+        <el-input v-model="userForm.username" placeholder="请输入用户名"/>
       </el-form-item>
       <el-form-item label="邮箱" prop="email">
-        <el-input v-model="userForm.email" placeholder="请输入邮箱" />
+        <el-input v-model="userForm.email" placeholder="请输入邮箱"/>
       </el-form-item>
       <el-form-item label="联系电话" prop="phone">
-        <el-input v-model="userForm.phone" placeholder="请输入联系电话" />
+        <el-input v-model="userForm.phone" placeholder="请输入联系电话"/>
       </el-form-item>
       <el-form-item label="简介" prop="introduction">
         <el-input
-          v-model="userForm.introduction"
-          maxlength="100"
-          placeholder="请输入简介"
-          resize="none"
-          :rows="3"
-          show-word-limit
-          type="textarea"
+            v-model="userForm.introduction"
+            maxlength="100"
+            placeholder="请输入简介"
+            resize="none"
+            :rows="3"
+            show-word-limit
+            type="textarea"
         >
         </el-input>
       </el-form-item>
@@ -58,32 +50,34 @@
   </el-card>
 
   <el-dialog
-    v-model="showDialogVisible"
-    title="验证邮箱"
-    width="auto"
-    @close="closeDialog"
+      v-model="showDialogVisible"
+      title="验证邮箱"
+      width="auto"
+      @close="closeDialog"
   >
     <el-form
-      ref="authEmailFormRef"
-      :model="authEmailForm"
-      :rules="authEmailFormRules"
+        ref="authEmailFormRef"
+        :model="authEmailForm"
+        :rules="authEmailFormRules"
     >
       <el-form-item label="邮箱" prop="email">
-        <el-input v-model="authEmailForm.email" disabled />
+        <el-input v-model="authEmailForm.email" disabled/>
       </el-form-item>
       <el-form-item label="验证码" prop="code">
-        <el-input v-model="authEmailForm.code" placeholder="请输入验证码" />
+        <el-input v-model="authEmailForm.code" placeholder="请输入验证码"/>
       </el-form-item>
     </el-form>
   </el-dialog>
+  <img-cropper ref="imgCropperRef" @crop-complete="cropComplete"/>
 </template>
 <script setup>
-import { nextTick, onMounted, reactive, ref } from "vue";
-import { useStore } from "vuex";
-import { message, messageBox } from "../utils/message.js";
+import {nextTick, onMounted, reactive, ref} from "vue";
+import {useStore} from "vuex";
+import {message, messageBox} from "../utils/message.js";
+import ImgCropper from "../layout/components/ImgCropper.vue";
 
-const defaultAvatar =
-  "https://cube.elemecdn.com/0/88/03b0d39583f48206768a7534e55bcpng.png";
+const imgCropperRef = ref(null);
+
 const store = useStore();
 const userForm = reactive({
   userAvatar: null,
@@ -101,11 +95,11 @@ const authEmailFormRef = ref(null);
 const showDialogVisible = ref(false);
 const userFormRules = {
   username: [
-    { required: true, message: "请输入用户名", trigger: "blur" },
-    { min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur" },
+    {required: true, message: "请输入用户名", trigger: "blur"},
+    {min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur"},
   ],
   email: [
-    { required: true, message: "请输入邮箱", trigger: "blur" },
+    {required: true, message: "请输入邮箱", trigger: "blur"},
     {
       type: "email",
       message: "请输入正确的邮箱地址",
@@ -120,19 +114,19 @@ const userFormRules = {
     },
   ],
   introduction: [
-    { max: 100, message: "长度不能超过 100 个字符", trigger: "blur" },
+    {max: 100, message: "长度不能超过 100 个字符", trigger: "blur"},
   ],
 };
 const authEmailFormRules = {
   email: [
-    { required: true, message: "请输入邮箱", trigger: "blur" },
+    {required: true, message: "请输入邮箱", trigger: "blur"},
     {
       type: "email",
       message: "请输入正确的邮箱地址",
       trigger: ["blur", "change"],
     },
   ],
-  code: [{ required: true, message: "请输入验证码", trigger: "change" }],
+  code: [{required: true, message: "请输入验证码", trigger: "change"}],
 };
 const commit = async () => {
   const valid = userFormRef.value.validate();
@@ -141,16 +135,24 @@ const commit = async () => {
   }
   if (store.state.USER_INFO.email !== userForm.email) {
     messageBox("新的邮箱需要验证，是否继续？", "检测到您修改了邮箱", "warning")
-      .then(() => {
-        showDialogVisible.value = true;
-      })
-      .catch(() => {
-        userForm.email = store.state.USER_INFO.email;
-        message("邮箱信息已恢复", "info");
-      });
+        .then(() => {
+          showDialogVisible.value = true;
+        })
+        .catch(() => {
+          userForm.email = store.state.USER_INFO.email;
+          message("邮箱信息已恢复", "info");
+        });
   } else {
     await store.dispatch("updateUserInfo", userForm);
   }
+};
+
+const openCropper = () => {
+  imgCropperRef.value.open(0);
+};
+
+const cropComplete = (data) => {
+  userForm.userAvatar = data;
 };
 
 const closeDialog = () => {

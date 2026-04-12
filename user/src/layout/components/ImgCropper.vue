@@ -19,9 +19,6 @@
         drag
         style="min-width: 500px"
       >
-        <el-icon class="el-icon--upload">
-          <upload-filled />
-        </el-icon>
         <div class="el-upload__text">
           点击或拖拽图片文件， 支持.jpg/.png格式的图片文件
         </div>

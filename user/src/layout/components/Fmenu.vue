@@ -3,18 +3,18 @@
     <el-menu :default-active="activePath" active-text-color="#303133" router>
       <el-menu-item index="/">
         <el-icon class="title-el-icon">
-          <HiOutlineMusicalNote />
+          <HiOutlineMusicalNote/>
         </el-icon>
         <span class="title-text">Oyudo Music</span>
       </el-menu-item>
       <template v-for="item in menuList" :key="item.path">
         <!--无分组菜单-->
         <el-menu-item
-          v-if="!item.group || item.group.length === 0"
-          :index="item.path"
+            v-if="!item.group || item.group.length === 0"
+            :index="item.path"
         >
           <el-icon class="menu-el-icon">
-            <component :is="item.icon" />
+            <component :is="item.icon"/>
           </el-icon>
           <span class="menu-text">{{ item.title }}</span>
         </el-menu-item>
@@ -25,12 +25,12 @@
             <span>{{ item.title }}</span>
           </template>
           <el-menu-item
-            v-for="(item2, index2) in item.group"
-            :key="index2"
-            :index="item2.path"
+              v-for="(item2, index2) in item.group"
+              :key="index2"
+              :index="item2.path"
           >
             <el-icon class="menu-el-icon">
-              <component :is="item2.icon" />
+              <component :is="item2.icon"/>
             </el-icon>
             <span class="menu-text">{{ item2.title }}</span>
           </el-menu-item>
@@ -43,17 +43,17 @@
         </template>
         <el-scrollbar height="400">
           <el-menu-item
-            v-for="playlist in favoritePlaylists"
-            :key="playlist.id"
-            :index="'/playlist/' + playlist.id"
-            class="playlist-item-container"
-            @click="handleClick(playlist)"
+              v-for="playlist in favoritePlaylists"
+              :key="playlist.id"
+              :index="'/playlist/' + playlist.id"
+              class="playlist-item-container"
+              @click="handleClick(playlist)"
           >
             <div class="playlist-cover">
               <el-image
-                :src="playlist.coverUrl"
-                fit="cover"
-                style="width: 50px; height: 50px"
+                  :src="playlist.coverUrl"
+                  fit="cover"
+                  style="width: 50px; height: 50px"
               />
             </div>
             <span class="playlist-text">{{ playlist.title }}</span>
@@ -64,10 +64,10 @@
   </div>
 </template>
 <script setup>
-import { menuList } from "../../utils/menus.js";
-import { useRoute } from "vue-router";
-import { computed, ref } from "vue";
-import { useStore } from "vuex";
+import {menuList} from "../../utils/menus.js";
+import {useRoute} from "vue-router";
+import {computed, ref, watch} from "vue";
+import {useStore} from "vuex";
 
 const store = useStore();
 const route = useRoute();
@@ -82,6 +82,10 @@ const activePath = ref(route.path);
 const handleClick = (playlist) => {
   store.commit("SET_SELECTED_PLAYLIST", playlist);
 };
+
+watch(() => route.path, (newVal) => {
+  activePath.value = newVal;
+})
 </script>
 <style scoped>
 .playlist-item-container {
