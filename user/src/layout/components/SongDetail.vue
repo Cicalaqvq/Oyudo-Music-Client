@@ -5,22 +5,24 @@
       <div class="top-section">
         <div>
           <el-icon class="back-icon" size="24" @click="back">
-            <Back/>
+            <Back />
           </el-icon>
         </div>
-        <div/>
+        <div />
       </div>
     </el-row>
     <!-- 左侧：歌曲信息和播放控制 -->
     <el-row :gutter="20">
       <el-col :span="10">
-
         <div class="left-section">
           <div class="cover-wrapper">
-            <img :src="currentSong.coverUrl" alt="cover" class="song-cover"/>
-            <div :class="{'vinyl-record_active': localIsPlaying}" class="vinyl-record">
+            <img :src="currentSong.coverUrl" alt="cover" class="song-cover" />
+            <div
+              :class="{ 'vinyl-record_active': localIsPlaying }"
+              class="vinyl-record"
+            >
               <div class="vinyl-inner">
-                <el-image :src="currentSong.coverUrl" class="vinyl-image"/>
+                <el-image :src="currentSong.coverUrl" class="vinyl-image" />
               </div>
             </div>
           </div>
@@ -33,52 +35,65 @@
           <div class="progress-section">
             <span class="time-text">{{ formatTime(currentTime) }}</span>
             <el-slider
-                v-model="localCurrentTime"
-                :max="duration"
-                :show-tooltip="false"
-                :step="1"
-                class="progress-slider"
-                @change="onProgressChange"
+              v-model="localCurrentTime"
+              :max="duration"
+              :show-tooltip="false"
+              :step="1"
+              class="progress-slider"
+              @change="onProgressChange"
             />
             <span class="time-text">{{ currentSong.duration }}</span>
           </div>
 
           <div class="player-controls">
             <el-icon class="control-icon" size="35" @click="previousSong">
-              <BiSkipPrevious/>
+              <BiSkipPrevious />
             </el-icon>
             <div class="play-btn" @click="togglePlay">
               <el-icon v-if="!localIsPlaying" size="40">
-                <BiPlay/>
+                <BiPlay />
               </el-icon>
               <el-icon v-else size="40">
-                <BiPause/>
+                <BiPause />
               </el-icon>
             </div>
             <el-icon class="control-icon" size="35" @click="nextSong">
-              <BiSkipNext/>
+              <BiSkipNext />
             </el-icon>
             <el-icon class="control-icon" size="30" @click="toggleFavorite">
-              <BiSolidHeart v-if="isFavorite" style="color: red"/>
-              <BiHeart v-else/>
+              <BiSolidHeart v-if="isFavorite" style="color: red" />
+              <BiHeart v-else />
             </el-icon>
             <el-tooltip :content="showPlayMode()" effect="light">
-              <el-icon v-if="localPlayMode === 0" class="control-icon" size="30" @click="onPlayModeChange">
-                <AiOutlineUnorderedList/>
+              <el-icon
+                v-if="localPlayMode === 0"
+                class="control-icon"
+                size="30"
+                @click="onPlayModeChange"
+              >
+                <AiOutlineUnorderedList />
               </el-icon>
-              <el-icon v-if="localPlayMode === 1" class="control-icon" size="30" @click="onPlayModeChange">
-                <LiaRandomSolid/>
+              <el-icon
+                v-if="localPlayMode === 1"
+                class="control-icon"
+                size="30"
+                @click="onPlayModeChange"
+              >
+                <LiaRandomSolid />
               </el-icon>
-              <el-icon v-if="localPlayMode === 2" class="control-icon" size="30" @click="onPlayModeChange">
-                <IpPlayCycle/>
+              <el-icon
+                v-if="localPlayMode === 2"
+                class="control-icon"
+                size="30"
+                @click="onPlayModeChange"
+              >
+                <IpPlayCycle />
               </el-icon>
             </el-tooltip>
           </div>
-
         </div>
       </el-col>
       <el-col :span="13">
-
         <!-- 右侧：歌曲信息和评论 -->
         <div class="right-section">
           <div class="song-meta">
@@ -86,11 +101,13 @@
             <div class="meta-info">
               <div class="meta-item">
                 <span class="label">专辑：</span>
-                <span class="value">{{ currentSong.album || '未知专辑' }}</span>
+                <span class="value">{{ currentSong.album || "未知专辑" }}</span>
               </div>
               <div class="meta-item">
                 <span class="label">发行时间：</span>
-                <span class="value">{{ formateDate(currentSong.releaseTime) }}</span>
+                <span class="value">{{
+                  formateDate(currentSong.releaseTime)
+                }}</span>
               </div>
             </div>
           </div>
@@ -101,24 +118,39 @@
               <el-form-item prop="content">
                 <div class="comment-input-wrapper">
                   <el-input
-                      v-model="commentForm.content"
-                      :maxlength="180"
-                      :rows="3"
-                      clearable
-                      placeholder="说点什么吧"
-                      resize="none"
-                      type="textarea"
+                    v-model="commentForm.content"
+                    :maxlength="180"
+                    :rows="3"
+                    clearable
+                    placeholder="说点什么吧"
+                    resize="none"
+                    type="textarea"
                   />
                   <div class="input-footer">
-                    <span class="char-count">{{ commentForm.content.length }} / 180</span>
-                    <el-button size="small" type="primary" @click="submitComment">发布</el-button>
+                    <span class="char-count"
+                      >{{ commentForm.content.length }} / 180</span
+                    >
+                    <el-button
+                      size="small"
+                      type="primary"
+                      @click="submitComment"
+                      >发布</el-button
+                    >
                   </div>
                 </div>
               </el-form-item>
             </el-form>
             <el-scrollbar height="500px">
-              <div v-for="comment in comments" :key="comment.id" class="comment-item">
-                <el-image :alt="comment.username" :src="comment.userAvatar || '/defaultAvatar.png'" class="comment-avatar"/>
+              <div
+                v-for="comment in comments"
+                :key="comment.id"
+                class="comment-item"
+              >
+                <el-image
+                  :alt="comment.username"
+                  :src="comment.userAvatar || '/defaultAvatar.png'"
+                  class="comment-avatar"
+                />
                 <div class="comment-content">
                   <div class="comment-header">
                     <span class="comment-user">{{ comment.username }}</span>
@@ -127,15 +159,21 @@
                   <div class="comment-footer">
                     <span class="comment-date">{{ comment.createTime }}</span>
                     <div class="comment-actions">
-                      <el-icon class="action-icon" @click="likeComment(comment.id)">
-                        <BiHeart/>
+                      <el-icon
+                        class="action-icon"
+                        @click="likeComment(comment.id)"
+                      >
+                        <BiHeart />
                       </el-icon>
                       <span class="likes-count">{{ comment.likeCount }}</span>
                     </div>
                   </div>
                 </div>
               </div>
-              <el-empty v-if="comments.length === 0" description="暂无评论，快来抢沙发~"/>
+              <el-empty
+                v-if="comments.length === 0"
+                description="暂无评论，快来抢沙发~"
+              />
             </el-scrollbar>
           </div>
         </div>
@@ -144,135 +182,159 @@
   </div>
 </template>
 <script setup>
-import {computed, reactive, ref, watch} from 'vue'
-import {BiHeart, BiPause, BiPlay, BiSkipNext, BiSkipPrevious, BiSolidHeart} from "vue-icons-plus/bi";
-import {useStore} from "vuex";
-import {AiOutlineUnorderedList} from "vue-icons-plus/ai";
-import {LiaRandomSolid} from "vue-icons-plus/lia";
-import {IpPlayCycle} from "vue-icons-plus/ip";
-import {publishComment, toggleFavoriteComment} from "../../utils/userComment.js";
+import { computed, reactive, ref, watch } from "vue";
+import {
+  BiHeart,
+  BiPause,
+  BiPlay,
+  BiSkipNext,
+  BiSkipPrevious,
+  BiSolidHeart,
+} from "vue-icons-plus/bi";
+import { useStore } from "vuex";
+import { AiOutlineUnorderedList } from "vue-icons-plus/ai";
+import { LiaRandomSolid } from "vue-icons-plus/lia";
+import { IpPlayCycle } from "vue-icons-plus/ip";
+import {
+  publishComment,
+  toggleFavoriteComment,
+} from "../../utils/userComment.js";
 
-
-const store = useStore()
+const store = useStore();
 
 const props = defineProps({
   currentTime: {
     type: Number,
-    default: 0
+    default: 0,
   },
   duration: {
     type: Number,
-    default: 0
+    default: 0,
   },
   isFavorite: {
     type: Boolean,
-    default: false
+    default: false,
   },
   comments: {
     type: Array,
-    default: []
-  }
-})
+    default: [],
+  },
+});
 
-const emit = defineEmits(['play', 'pause', 'next', 'previous', 'on-progress-change', 'back', 'toggle-favorite', 'fetch-comments'])
+const emit = defineEmits([
+  "play",
+  "pause",
+  "next",
+  "previous",
+  "on-progress-change",
+  "back",
+  "toggle-favorite",
+  "fetch-comments",
+]);
 
-const localCurrentTime = ref(props.currentTime)
+const localCurrentTime = ref(props.currentTime);
 
-const localPlayMode = computed(() => store.state.PLAY_MODE || 0)
+const localPlayMode = computed(() => store.state.PLAY_MODE || 0);
 
 const commentForm = reactive({
-  content: '',
-  songId: null
-})
+  content: "",
+  songId: null,
+});
 
-const formRef = ref(null)
+const formRef = ref(null);
 
 const rules = {
   content: [
-    {required: true, message: '请输入评论内容', trigger: 'change'},
-    {min: 1, max: 180, message: '评论长度在 1 到 180 个字符', trigger: 'blur'}
-  ]
-}
+    { required: true, message: "请输入评论内容", trigger: "change" },
+    {
+      min: 1,
+      max: 180,
+      message: "评论长度在 1 到 180 个字符",
+      trigger: "blur",
+    },
+  ],
+};
 
-const currentSong = computed(() => store.state.CURRENT_SONG || {})
+const currentSong = computed(() => store.state.CURRENT_SONG || {});
 
-const localIsPlaying = computed(() => store.state.IS_PLAYING || false)
+const localIsPlaying = computed(() => store.state.IS_PLAYING || false);
 
 // 显示播放模式名称
 const showPlayMode = () => {
   switch (localPlayMode.value) {
     case 0:
-      return "顺序播放"
+      return "顺序播放";
     case 1:
-      return "随机播放"
+      return "随机播放";
     case 2:
-      return "单曲循环"
+      return "单曲循环";
   }
 };
 
 // 播放模式切换
 const onPlayModeChange = () => {
-  store.commit("SET_PLAY_MODE", (localPlayMode.value + 1) % 3)
+  store.commit("SET_PLAY_MODE", (localPlayMode.value + 1) % 3);
 };
 
 const toggleFavorite = () => {
-  emit('toggle-favorite')
-}
+  emit("toggle-favorite");
+};
 
 const back = () => {
-  emit('back')
-}
+  emit("back");
+};
 
 const onProgressChange = (value) => {
-  emit('on-progress-change', value)
-}
+  emit("on-progress-change", value);
+};
 
 const formateDate = (date) => {
-  const options = {year: 'numeric', month: 'long', day: 'numeric'}
-  return new Date(date).toLocaleDateString(undefined, options)
-}
+  const options = { year: "numeric", month: "long", day: "numeric" };
+  return new Date(date).toLocaleDateString(undefined, options);
+};
 
 const formatTime = (time) => {
-  const minutes = Math.floor(time / 60)
-  const seconds = Math.floor(time % 60)
-  return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
-}
+  const minutes = Math.floor(time / 60);
+  const seconds = Math.floor(time % 60);
+  return `${minutes.toString().padStart(2, "0")}:${seconds.toString().padStart(2, "0")}`;
+};
 
 const togglePlay = () => {
   if (localIsPlaying.value) {
-    emit('pause')
+    emit("pause");
   } else {
-    emit('play')
+    emit("play");
   }
-}
+};
 
 const previousSong = () => {
-  emit('previous')
-}
+  emit("previous");
+};
 
 const nextSong = () => {
-  emit('next')
-}
+  emit("next");
+};
 
 const submitComment = async () => {
-  const res = await publishComment(store, commentForm)
-  if (res) fetchComments()
-}
+  const res = await publishComment(store, commentForm);
+  if (res) fetchComments();
+};
 
 const likeComment = async (id) => {
-  const res = await toggleFavoriteComment(store, id)
-  if (res) fetchComments()
-}
+  const res = await toggleFavoriteComment(store, id);
+  if (res) fetchComments();
+};
 
 const fetchComments = () => {
-  emit('fetch-comments')
-}
+  emit("fetch-comments");
+};
 
-watch(() => props.currentTime, (newVal) => {
-  localCurrentTime.value = newVal
-})
-
-
+watch(
+  () => props.currentTime,
+  (newVal) => {
+    localCurrentTime.value = newVal;
+  },
+);
 </script>
 
 <style scoped>
@@ -285,7 +347,7 @@ watch(() => props.currentTime, (newVal) => {
   transition: color 0.3s ease-in-out;
 }
 
-/deep/ .el-row {
+:deep(.el-row) {
   margin-bottom: 20px;
 }
 
@@ -436,7 +498,7 @@ watch(() => props.currentTime, (newVal) => {
   width: 56px;
   height: 56px;
   border-radius: 50%;
-  background-color: #409EFF;
+  background-color: #409eff;
   color: white;
   display: flex;
   align-items: center;
@@ -539,7 +601,7 @@ watch(() => props.currentTime, (newVal) => {
 
 .comment-user {
   font-size: 14px;
-  color: #409EFF;
+  color: #409eff;
   font-weight: 500;
 }
 

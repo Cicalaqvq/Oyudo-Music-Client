@@ -2,10 +2,21 @@
   <div class="recommend-container">
     <!-- 轮播图区域 -->
     <div class="banner-section">
-      <el-carousel v-if="banners.length" :interval="4000" arrow="always" autoplay height="auto" type="card">
-        <el-carousel-item v-for="banner in banners" :key="banner.id" style="height: 300px">
+      <el-carousel
+        v-if="banners.length"
+        :interval="4000"
+        arrow="always"
+        autoplay
+        height="auto"
+        type="card"
+      >
+        <el-carousel-item
+          v-for="banner in banners"
+          :key="banner.id"
+          style="height: 300px"
+        >
           <div class="banner-item">
-            <el-image :src="banner.bannerUrl" class="banner-image" lazy/>
+            <el-image :src="banner.bannerUrl" class="banner-image" lazy />
           </div>
         </el-carousel-item>
       </el-carousel>
@@ -17,22 +28,21 @@
         <h2 class="section-title">今日为你推荐</h2>
         <div class="section-more" @click="viewMore">
           <el-icon>
-            <Share/>
+            <Share />
           </el-icon>
           <span>更多</span>
         </div>
       </div>
       <div class="playlist-grid">
         <div
-            v-for="playlist in playlists"
-            :key="playlist.id"
-            class="playlist-item"
-            @click="showPlaylistDetail(playlist)"
+          v-for="playlist in playlists"
+          :key="playlist.id"
+          class="playlist-item"
+          @click="showPlaylistDetail(playlist)"
         >
-
           <div class="playlist-cover">
-            <el-image :src="playlist.coverUrl" alt="封面"/>
-            <div class="play-btn"/>
+            <el-image :src="playlist.coverUrl" alt="封面" />
+            <div class="play-btn" />
           </div>
           <div class="playlist-info">
             <div class="like-name">{{ playlist.title }}</div>
@@ -47,7 +57,7 @@
         <h2 class="section-title">相似推荐</h2>
         <div class="section-more" @click="refreshRecommend">
           <el-icon>
-            <Refresh/>
+            <Refresh />
           </el-icon>
           <span>刷新</span>
         </div>
@@ -55,13 +65,18 @@
       <div class="song-list">
         <div class="songs-column">
           <div
-              v-for="song in songsLeft"
-              :key="song.id"
-              class="song-item"
-              @click="playSong(song)"
+            v-for="song in songsLeft"
+            :key="song.id"
+            class="song-item"
+            @click="playSong(song)"
           >
             <div class="song-left">
-              <el-image :alt="song.name" :src="song.coverUrl" class="song-cover" lazy/>
+              <el-image
+                :alt="song.name"
+                :src="song.coverUrl"
+                class="song-cover"
+                lazy
+              />
               <div class="song-info">
                 <div class="song-title">{{ song.name }}</div>
                 <div class="song-artist">{{ song.artistName }}</div>
@@ -72,13 +87,18 @@
         </div>
         <div class="songs-column">
           <div
-              v-for="song in songsRight"
-              :key="song.id"
-              class="song-item"
-              @click="playSong(song)"
+            v-for="song in songsRight"
+            :key="song.id"
+            class="song-item"
+            @click="playSong(song)"
           >
             <div class="song-left">
-              <el-image :alt="song.name" :src="song.coverUrl" class="song-cover" lazy/>
+              <el-image
+                :alt="song.name"
+                :src="song.coverUrl"
+                class="song-cover"
+                lazy
+              />
               <div class="song-info">
                 <div class="song-title">{{ song.name }}</div>
                 <div class="song-artist">{{ song.artistName }}</div>
@@ -93,90 +113,93 @@
 </template>
 
 <script setup>
-import {computed, onMounted, ref} from 'vue'
-import {Refresh, Share} from '@element-plus/icons-vue'
-import {getBanners, getRecommendPlaylists, getRecommendSongs} from "../api/manage.js";
-import {useStore} from "vuex";
-import {useRouter} from "vue-router";
+import { computed, onMounted, ref } from "vue";
+import { Refresh, Share } from "@element-plus/icons-vue";
+import {
+  getBanners,
+  getRecommendPlaylists,
+  getRecommendSongs,
+} from "../api/manage.js";
+import { useStore } from "vuex";
+import { useRouter } from "vue-router";
 
-const store = useStore()
-const router = useRouter()
+const store = useStore();
+const router = useRouter();
 
 // 轮播图数据
-const banners = ref([])
+const banners = ref([]);
 
 // 推荐歌单数据
-const playlists = ref([])
+const playlists = ref([]);
 
 // 推荐歌曲数据
-const songs = ref([])
+const songs = ref([]);
 
 // 计算属性：将歌曲分为左右两列
-const songsLeft = computed(() => songs.value.slice(0, 10))
-const songsRight = computed(() => songs.value.slice(10, 20))
+const songsLeft = computed(() => songs.value.slice(0, 10));
+const songsRight = computed(() => songs.value.slice(10, 20));
 
 // 查看更多
 const viewMore = () => {
   fetchRecommendPlaylists();
-}
+};
 
 // 刷新推荐
 const refreshRecommend = () => {
   fetchRecommendSongs();
-}
+};
 
 // 播放歌单
 const showPlaylistDetail = (playlist) => {
-  store.commit('SET_SELECTED_PLAYLIST', playlist);
-  router.push({path: '/playlist/' + playlist.id});
-}
+  store.commit("SET_SELECTED_PLAYLIST", playlist);
+  router.push({ path: "/playlist/" + playlist.id });
+};
 
 // 播放歌曲
 const playSong = (song) => {
-  store.commit('SET_CURRENT_SONG', song);
+  store.commit("SET_CURRENT_SONG", song);
   store.commit("ADD_SONG_TO_USER_PLAYLIST", song);
   store.commit("SET_PLAYING", true);
-}
+};
 
 const fetchBanners = async () => {
-  await getBanners().then(res => {
+  await getBanners().then((res) => {
     if (res.data.code === 200) {
       banners.value = res.data.data.records;
     }
-  })
-}
+  });
+};
 const fetchRecommendPlaylists = async () => {
-  await getRecommendPlaylists().then(res => {
+  await getRecommendPlaylists().then((res) => {
     if (res.data.code === 200) {
       playlists.value = res.data.data;
     }
-  })
-}
+  });
+};
 const fetchRecommendSongs = async () => {
-  await getRecommendSongs().then(res => {
+  await getRecommendSongs().then((res) => {
     if (res.data.code === 200) {
       songs.value = res.data.data;
-      songs.value.forEach(song => {
+      songs.value.forEach((song) => {
         const minutes = Math.floor(song.duration / 60);
         const seconds = Math.floor(song.duration % 60);
-        song.duration = minutes + ':' + (seconds < 10 ? '0' + seconds : seconds);
-      })
+        song.duration =
+          minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+      });
     }
-  })
-}
+  });
+};
 
 const initData = async () => {
   // 初始化数据
   await fetchBanners();
   await fetchRecommendPlaylists();
   await fetchRecommendSongs();
-}
+};
 
 onMounted(() => {
   initData();
-})
-
-
+});
 </script>
 
 <style scoped>
@@ -226,7 +249,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 4px;
-  color: #409EFF;
+  color: #409eff;
   cursor: pointer;
   font-size: 14px;
   transition: opacity 0.2s;
@@ -277,12 +300,11 @@ onMounted(() => {
 }
 
 .playlist-item:hover .play-btn::after {
-  content: '▷';
+  content: "▷";
   font-size: 18px;
   font-weight: bolder;
   position: absolute;
 }
-
 
 .playlist-cover {
   position: relative;
@@ -290,7 +312,6 @@ onMounted(() => {
   aspect-ratio: 1;
   overflow: hidden;
 }
-
 
 .playlist-info {
   padding: 0 4px;
@@ -350,7 +371,7 @@ onMounted(() => {
 }
 
 .song-left:hover .song-cover::before {
-  content: '';
+  content: "";
   position: absolute;
   top: 0;
   left: 0;
@@ -361,7 +382,7 @@ onMounted(() => {
 }
 
 .song-left:hover .song-cover::after {
-  content: '▷';
+  content: "▷";
   position: absolute;
   top: 46%;
   left: 56%;
@@ -395,5 +416,4 @@ onMounted(() => {
   min-width: 45px;
   text-align: right;
 }
-
 </style>

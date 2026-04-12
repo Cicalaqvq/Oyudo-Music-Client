@@ -6,11 +6,10 @@
       <!-- 左侧筛选栏 -->
       <div class="sidebar">
         <div class="sidebar-header">
-          <span style="font-size: 16px;font-weight: 800;">歌手分类</span>
-          <div class="reset-filters"
-               @click="resetFilters">
+          <span style="font-size: 16px; font-weight: 800">歌手分类</span>
+          <div class="reset-filters" @click="resetFilters">
             <el-icon size="15" style="padding-top: 2px">
-              <BiReset/>
+              <BiReset />
             </el-icon>
             <div style="margin-left: 5px">重置</div>
           </div>
@@ -19,24 +18,24 @@
         <!-- 搜索框 -->
         <div class="search-box">
           <el-input
-              v-model="searchForm.name"
-              placeholder="搜索歌手"
-              prefix-icon="Search"
-              @input="handleInput"
+            v-model="searchForm.name"
+            placeholder="搜索歌手"
+            prefix-icon="Search"
+            @input="handleInput"
           />
         </div>
 
-        <template v-for="(item) in options" :key="item.index">
+        <template v-for="item in options" :key="item.index">
           <div class="filter-group">
             <div class="filter-title">{{ item.title }}</div>
             <el-radio-group class="filter-options">
               <el-radio-button
-                  v-for="child in item.option"
-                  :class="{active: item.selected === child.value}"
-                  :label=child.label
-                  :value=child.value
-                  class="filter-option"
-                  @click="handleSelect(item,child)"
+                v-for="child in item.option"
+                :class="{ active: item.selected === child.value }"
+                :label="child.label"
+                :value="child.value"
+                class="filter-option"
+                @click="handleSelect(item, child)"
               >
               </el-radio-button>
             </el-radio-group>
@@ -50,34 +49,40 @@
           <!-- 歌手列表 -->
           <div class="artist-grid">
             <div
-                v-for="artist in artists"
-                :key="artist.id"
-                v-loading="loading"
-                class="artist-item"
-                @click="handleClick(artist)"
-                @mouseenter="handleMouseEnter(artist.id)"
-                @mouseleave="handleMouseLeave"
+              v-for="artist in artists"
+              :key="artist.id"
+              v-loading="loading"
+              class="artist-item"
+              @click="handleClick(artist)"
+              @mouseenter="handleMouseEnter(artist.id)"
+              @mouseleave="handleMouseLeave"
             >
               <div class="artist-avatar">
-                <el-image :lazy=true :src="artist.avatar" alt="歌手头像"
-                          style="width: 100%;height: 100%;border-radius: 50%"/>
+                <el-image
+                  :lazy="true"
+                  :src="artist.avatar"
+                  alt="歌手头像"
+                  style="width: 100%; height: 100%; border-radius: 50%"
+                />
               </div>
-              <div v-show="hoverIndex === artist.id" class="artist-name">{{ artist.name }}</div>
+              <div v-show="hoverIndex === artist.id" class="artist-name">
+                {{ artist.name }}
+              </div>
             </div>
           </div>
-          <el-empty v-if="artists.length === 0" description="暂无数据"/>
+          <el-empty v-if="artists.length === 0" description="暂无数据" />
         </el-scrollbar>
 
         <!-- 分页 -->
         <div class="pagination-container" v-if="artists.length !== 0">
           <el-pagination
-              :current-page="page.currentPage"
-              :page-size="searchForm.pageSize"
-              :page-sizes="[12, 24, 36]"
-              :total="page.total"
-              layout="total, sizes, prev, pager, next, jumper"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
+            :current-page="page.currentPage"
+            :page-size="searchForm.pageSize"
+            :page-sizes="[12, 24, 36]"
+            :total="page.total"
+            layout="total, sizes, prev, pager, next, jumper"
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
           />
         </div>
       </div>
@@ -86,14 +91,14 @@
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from "vue";
-import {BiReset} from "vue-icons-plus/bi";
-import {getArtists} from "../api/manage.js";
-import {useRouter} from "vue-router";
-import {useStore} from "vuex";
+import { onMounted, reactive, ref } from "vue";
+import { BiReset } from "vue-icons-plus/bi";
+import { getArtists } from "../api/manage.js";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
 
-const store = useStore()
-const router = useRouter()
+const store = useStore();
+const router = useRouter();
 const options = ref([
   {
     title: "歌手类型",
@@ -116,7 +121,7 @@ const options = ref([
         value: 2,
         label: "华语组合/乐队",
       },
-    ]
+    ],
   },
   {
     title: "地区类型",
@@ -146,89 +151,91 @@ const options = ref([
       {
         value: 4,
         label: "其他",
-      }
-    ]
-  }
-])
-const loading = ref(false)
-const artists = ref([])
+      },
+    ],
+  },
+]);
+const loading = ref(false);
+const artists = ref([]);
 const page = ref({
   currentPage: 1,
   total: 0,
-})
+});
 const searchForm = reactive({
   name: null,
   gender: null,
   area: null,
   pageNum: 1,
   pageSize: 12,
-})
-const hoverIndex = ref(null)
+});
+const hoverIndex = ref(null);
 const handleMouseEnter = (id) => {
-  hoverIndex.value = id
-}
+  hoverIndex.value = id;
+};
 const handleMouseLeave = () => {
-  hoverIndex.value = null
-}
+  hoverIndex.value = null;
+};
 const handleSizeChange = (size) => {
-  searchForm.pageSize = size
-  handleCurrentChange(1)
-}
+  searchForm.pageSize = size;
+  handleCurrentChange(1);
+};
 const handleCurrentChange = (currentPage) => {
-  page.value.currentPage = currentPage
-  searchForm.pageNum = currentPage
-  fetchArtists()
-}
+  page.value.currentPage = currentPage;
+  searchForm.pageNum = currentPage;
+  fetchArtists();
+};
 const resetFilters = () => {
-  searchForm.name = null
-  searchForm.gender = null
-  searchForm.area = null
-  searchForm.pageNum = 1
-  options.value.forEach(item => {
-    item.selected = null
-  })
-  fetchArtists()
-}
+  searchForm.name = null;
+  searchForm.gender = null;
+  searchForm.area = null;
+  searchForm.pageNum = 1;
+  options.value.forEach((item) => {
+    item.selected = null;
+  });
+  fetchArtists();
+};
 const handleInput = (value) => {
-  searchForm.name = value
-  page.value.currentPage = 1
-  fetchArtists()
-}
+  searchForm.name = value;
+  page.value.currentPage = 1;
+  fetchArtists();
+};
 const handleSelect = (parent, child) => {
-  parent.selected = child.value
+  parent.selected = child.value;
   switch (parent.index) {
     case 0:
-      searchForm.gender = child.value
+      searchForm.gender = child.value;
       break;
     case 1:
-      searchForm.area = child.label
+      searchForm.area = child.label;
       break;
   }
-  page.value.currentPage = 1
-  fetchArtists()
-}
+  page.value.currentPage = 1;
+  fetchArtists();
+};
 const fetchArtists = async () => {
-  loading.value = true
-  getArtists(searchForm).then(res => {
-    if (res.data.code === 200) {
-      artists.value = res.data.data.records
-      page.value.total = res.data.data.total
-      searchForm.pageNum = page.value.currentPage
-    }
-  }).finally(() => {
-    loading.value = false
-  })
-}
+  loading.value = true;
+  getArtists(searchForm)
+    .then((res) => {
+      if (res.data.code === 200) {
+        artists.value = res.data.data.records;
+        page.value.total = res.data.data.total;
+        searchForm.pageNum = page.value.currentPage;
+      }
+    })
+    .finally(() => {
+      loading.value = false;
+    });
+};
 
 const handleClick = (artist) => {
-  store.commit("SET_SELECTED_ARTIST", artist)
+  store.commit("SET_SELECTED_ARTIST", artist);
   router.push({
     path: "/artist/" + artist.id,
-  })
-}
+  });
+};
 onMounted(() => {
-  fetchArtists()
-})
+  fetchArtists();
+});
 </script>
 
 <style scoped>
@@ -245,7 +252,7 @@ onMounted(() => {
 
 .artist-page {
   padding: 20px;
-  font-family: 'Microsoft YaHei', sans-serif;
+  font-family: "Microsoft YaHei", sans-serif;
 }
 
 .container {
@@ -298,7 +305,6 @@ onMounted(() => {
     outline: none;
     background-color: transparent;
   }
-
 }
 
 .filter-option {
@@ -342,7 +348,6 @@ onMounted(() => {
   margin-left: 10px;
   margin-top: 10px;
 }
-
 
 .artist-name {
   position: absolute;

@@ -1,83 +1,78 @@
 <template>
   <!-- 图片裁剪弹窗 -->
   <el-dialog
-      v-model="dialogVisible"
-      align-center
-      title="图片上传/裁剪"
-      width="auto"
-
+    v-model="dialogVisible"
+    align-center
+    title="图片上传/裁剪"
+    width="auto"
   >
     <div class="cropper-content">
       <el-upload
-          ref="uploadRef"
-          :auto-upload=false
-          :class="{hideUpload : isHideUpload}"
-          :limit="1"
-          :on-change="handleOnChange"
-          :on-remove="handleOnRemove"
-          :show-file-list="true"
-          accept=".jpg,.png"
-          drag
-          style="min-width: 500px"
+        ref="uploadRef"
+        :auto-upload="false"
+        :class="{ hideUpload: isHideUpload }"
+        :limit="1"
+        :on-change="handleOnChange"
+        :on-remove="handleOnRemove"
+        :show-file-list="true"
+        accept=".jpg,.png"
+        drag
+        style="min-width: 500px"
       >
         <el-icon class="el-icon--upload">
-          <upload-filled/>
+          <upload-filled />
         </el-icon>
         <div class="el-upload__text">
-          点击或拖拽图片文件，
-          支持.jpg/.png格式的图片文件
+          点击或拖拽图片文件， 支持.jpg/.png格式的图片文件
         </div>
       </el-upload>
       <el-row v-if="showCropper" gutter="20">
         <el-col span="6">
           <div class="cropper">
             <vueCropper
-                v-if="showCropper"
-                ref="cropper"
-                :autoCrop="options.autoCrop"
-                :autoCropHeight="options.autoCropHeight"
-                :autoCropWidth="options.autoCropWidth"
-                :canMove="options.canMove"
-                :canMoveBox="options.canMoveBox"
-                :centerBox="options.centerBox"
-                :fixed="options.fixed"
-                :fixedBox="options.fixedBox"
-                :fixedNumber="options.fixedNumber"
-                :full="options.full"
-                :img="options.img"
-                :info="true"
-                :infoTrue="options.infoTrue"
-                :original="options.original"
-                :outputType="options.outputType"
-                @realTime="generateReview"
+              v-if="showCropper"
+              ref="cropper"
+              :autoCrop="options.autoCrop"
+              :autoCropHeight="options.autoCropHeight"
+              :autoCropWidth="options.autoCropWidth"
+              :canMove="options.canMove"
+              :canMoveBox="options.canMoveBox"
+              :centerBox="options.centerBox"
+              :fixed="options.fixed"
+              :fixedBox="options.fixedBox"
+              :fixedNumber="options.fixedNumber"
+              :full="options.full"
+              :img="options.img"
+              :info="true"
+              :infoTrue="options.infoTrue"
+              :original="options.original"
+              :outputType="options.outputType"
+              @realTime="generateReview"
             />
             <div v-if="showCropper" class="handle_btn">
-              <el-button
-                  plain
-                  type="primary"
-                  @click="changeScale(1)"
-              >+ 放大
+              <el-button plain type="primary" @click="changeScale(1)"
+                >+ 放大
               </el-button>
               <el-button
-                  v-if="showCropper"
-                  plain
-                  type="primary"
-                  @click="changeScale(-1)"
-              >- 缩小
+                v-if="showCropper"
+                plain
+                type="primary"
+                @click="changeScale(-1)"
+                >- 缩小
               </el-button>
               <el-button
-                  v-if="showCropper"
-                  plain
-                  type="primary"
-                  @click="rotateLeft"
-              >↺ 左旋转
+                v-if="showCropper"
+                plain
+                type="primary"
+                @click="rotateLeft"
+                >↺ 左旋转
               </el-button>
               <el-button
-                  v-if="showCropper"
-                  plain
-                  type="primary"
-                  @click="rotateRight"
-              >↻ 右旋转
+                v-if="showCropper"
+                plain
+                type="primary"
+                @click="rotateRight"
+                >↻ 右旋转
               </el-button>
             </div>
           </div>
@@ -85,54 +80,54 @@
         <el-col span="6">
           <el-card>
             <div class="cropper-img">
-              <el-avatar v-if="showAvatar"
-                         :src="imgReview.url"
-                         fit="cover"
-                         style="width: 290px;height: 290px"
+              <el-avatar
+                v-if="showAvatar"
+                :src="imgReview.url"
+                fit="cover"
+                style="width: 290px; height: 290px"
               />
               <el-image
-                  v-else
-                  :preview-src-list="imgReview.url"
-                  :preview-teleported="true"
-                  :show-progress="true"
-                  :src="imgReview.url"
-                  fit="cover"
-                  style="width: 600px;height: 200px"
+                v-else
+                :preview-src-list="imgReview.url"
+                :preview-teleported="true"
+                :show-progress="true"
+                :src="imgReview.url"
+                fit="cover"
+                style="width: 600px; height: 200px"
               />
-
             </div>
 
             <div>
               图片宽高：{{ imgReview.width }} x {{ imgReview.height }} 像素
             </div>
             <div>
-              图片大小： {{ formatFileSize(imgReview.size) }} ({{ imgReview.size }} 字节)
+              图片大小： {{ formatFileSize(imgReview.size) }} ({{
+                imgReview.size
+              }}
+              字节)
             </div>
           </el-card>
         </el-col>
       </el-row>
     </div>
     <template #footer>
-        <span class="dialog-footer">
-          <el-button @click="cancelCrop">取消</el-button>
-          <el-button
-              :loading="loading"
-              type="primary"
-              @click="confirmCrop"
-          > 确认裁剪 </el-button>
-        </span>
+      <span class="dialog-footer">
+        <el-button @click="cancelCrop">取消</el-button>
+        <el-button :loading="loading" type="primary" @click="confirmCrop">
+          确认裁剪
+        </el-button>
+      </span>
     </template>
   </el-dialog>
 </template>
 
 <script setup>
-
-import {reactive, ref} from "vue";
-import {message} from "../../utils/message.js";
-import {uploadImg} from "../../api/manage.js";
+import { reactive, ref } from "vue";
+import { message } from "../../utils/message.js";
+import { uploadImg } from "../../api/manage.js";
 
 // 父组件调用
-const emit = defineEmits(["cropComplete"])
+const emit = defineEmits(["cropComplete"]);
 
 // 头像裁剪
 const dialogVisible = ref(false);
@@ -140,13 +135,12 @@ const loading = ref(false);
 const uploadRef = ref();
 const showAvatar = ref(true);
 
-
 const imgReview = reactive({
   url: null,
   height: null,
   width: null,
-  size: null
-})
+  size: null,
+});
 
 //获取裁剪图片组件
 const showCropper = ref(false);
@@ -178,22 +172,21 @@ const options = reactive({
 });
 
 const formatFileSize = (bytes) => {
-  if (bytes === 0) return '0 Bytes';
+  if (bytes === 0) return "0 Bytes";
   const k = 1024;
-  const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+  const sizes = ["Bytes", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
-  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
 };
-
 
 // 上传图片
 const handleOnChange = (file) => {
   if (file.raw.type.indexOf("image") === -1) {
-    message("请上传图片文件", "error")
+    message("请上传图片文件", "error");
     return false;
   }
   if (file.size / 1024 / 1024 > 10) {
-    message("图片不能大于10M", "error")
+    message("图片不能大于10M", "error");
     return false;
   }
   const reader = new FileReader();
@@ -211,7 +204,6 @@ const handleOnRemove = () => {
   isHideUpload.value = false;
 };
 
-
 // 确认裁剪
 const confirmCrop = () => {
   loading.value = true;
@@ -221,25 +213,27 @@ const confirmCrop = () => {
     });
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("flag", flagSrc)
-    uploadImg(formData).then(res => {
-      if (res.data.code === 200) {
-        message("图片裁剪结果已上传")
-        emit("cropComplete", res.data.data)
-        dialogVisible.value = false
-      }
-    }).finally(() => {
-      loading.value = false
-    })
-  })
+    formData.append("flag", flagSrc);
+    uploadImg(formData)
+      .then((res) => {
+        if (res.data.code === 200) {
+          message("图片裁剪结果已上传");
+          emit("cropComplete", res.data.data);
+          dialogVisible.value = false;
+        }
+      })
+      .finally(() => {
+        loading.value = false;
+      });
+  });
 };
 
 // 取消裁剪
 const cancelCrop = () => {
-  uploadRef.value?.clearFiles()
-  handleOnRemove()
-  dialogVisible.value = false
-}
+  uploadRef.value?.clearFiles();
+  handleOnRemove();
+  dialogVisible.value = false;
+};
 
 // 缩放
 const changeScale = (num) => {
@@ -258,16 +252,16 @@ const rotateRight = () => {
 const generateReview = async (data) => {
   await cropper.value.getCropBlob((blob) => {
     imgReview.url = window.URL.createObjectURL(blob);
-    imgReview.size = blob.size
-    imgReview.height = data.h
-    imgReview.width = data.w
-  })
+    imgReview.size = blob.size;
+    imgReview.height = data.h;
+    imgReview.width = data.w;
+  });
 };
 // 暴露方法
 defineExpose({
   open(flag) {
     // flag: 0 头像 1 歌手头像 2 歌曲封面 3 歌单封面 4.轮播图
-    flagSrc = flag
+    flagSrc = flag;
     switch (flag) {
       case 4:
         showAvatar.value = false;
@@ -275,19 +269,16 @@ defineExpose({
         options.autoCropHeight = 200;
         options.fixedNumber = [3, 1];
     }
-    dialogVisible.value = true
+    dialogVisible.value = true;
   },
-})
-
+});
 </script>
-
 
 <style scoped>
 .cropper {
   width: 395px;
   height: 395px;
 }
-
 
 .cropper-img {
   display: flex;
@@ -303,5 +294,4 @@ defineExpose({
 .hideUpload /deep/ .el-upload--text {
   display: none;
 }
-
 </style>

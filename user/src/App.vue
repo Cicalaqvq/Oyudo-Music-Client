@@ -1,13 +1,11 @@
-
-
 <template>
   <router-view></router-view>
 </template>
-<script setup>
-
-</script>
+<script setup></script>
 <style scoped>
-html, body, #app {
+html,
+body,
+#app {
   margin: 0;
   padding: 0;
   height: 100%;

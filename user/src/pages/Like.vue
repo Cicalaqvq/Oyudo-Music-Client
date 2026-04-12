@@ -3,11 +3,11 @@
     <!-- 歌单信息区域 -->
     <div class="playlist-info">
       <div class="like-avatar">
-        <el-image v-if="songs.length" :src="songs[0].coverUrl || defaultAvatar"
-                  style="width: 100%;height: 100%;object-fit: cover;"/>
-        <el-image v-else :src="defaultAvatar"
-                  style="width: 100%;height: 100%;object-fit: cover;"/>
-
+        <el-image
+          v-if="songs.length"
+          :src="songs[0].coverUrl || '/defaultSongCover.png'"
+          style="width: 100%; height: 100%; object-fit: cover"
+        />
       </div>
       <div class="like-content">
         <h1 class="like-name">我喜欢的音乐</h1>
@@ -17,7 +17,12 @@
           </p>
         </div>
         <div class="like-footer">
-          <el-button class="play-button" style="width: 100px" type="primary" @click="playAll">
+          <el-button
+            class="play-button"
+            style="width: 100px"
+            type="primary"
+            @click="playAll"
+          >
             <span style="font-size: 12px">▷ 播放全部</span>
           </el-button>
         </div>
@@ -28,67 +33,72 @@
     <div class="tabs-section">
       <div class="song-list">
         <el-scrollbar height="auto">
-          <el-table v-if="songs.length"
-                    v-loading="tableLoading"
-                    :cellStyle="{ width: '100%','border-bottom': 'none' }"
-                    :data="songs"
-                    :header-cell-style="{ width: '100%','border-bottom':'none' }"
-                    :row-class-name="rowClassName"
-                    :tooltip-options="{ placement: 'top' ,offset:-20,effect:'light' }"
-                    element-loading-text="Loading..."
-                    height="550"
-                    style="width: 100%;font-size: 12px"
-                    @row-dblclick="playSong"
+          <el-table
+            v-if="songs.length"
+            v-loading="tableLoading"
+            :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
+            :data="songs"
+            :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
+            :row-class-name="rowClassName"
+            :tooltip-options="{
+              placement: 'top',
+              offset: -20,
+              effect: 'light',
+            }"
+            element-loading-text="Loading..."
+            height="550"
+            style="width: 100%; font-size: 12px"
+            @row-dblclick="playSong"
           >
             >
-            <el-table-column v-for="column in columns"
-                             :key="column.prop"
-                             :label="column.label"
-                             :prop="column.prop"
-                             :show-overflow-tooltip="true"
-                             :width="column.width || 'auto'"
+            <el-table-column
+              v-for="column in columns"
+              :key="column.prop"
+              :label="column.label"
+              :prop="column.prop"
+              :show-overflow-tooltip="true"
+              :width="column.width || 'auto'"
             >
-
               <template #default="{ row }">
                 <template v-if="column.slot">
                   <div class="song-info">
                     <div class="song-cover">
                       <el-image
-                          :preview-src-list="[row.coverUrl]"
-                          :preview-teleported="true"
-                          :show-progress="true"
-                          :src="row.coverUrl"
-                          alt="Song"
-                          style="width: 45px;height: 45px"
+                        :preview-src-list="[row.coverUrl]"
+                        :preview-teleported="true"
+                        :show-progress="true"
+                        :src="row.coverUrl"
+                        alt="Song"
+                        style="width: 45px; height: 45px"
                       >
                       </el-image>
                     </div>
-                    <div class="song-title">{{ row.name }}
-                    </div>
+                    <div class="song-title">{{ row.name }}</div>
                   </div>
                 </template>
 
-                <template v-else-if="column.prop==='like'">
+                <template v-else-if="column.prop === 'like'">
                   <el-icon class="control-icon" @click="toggleLike(row)">
-                    <BiSolidHeart style="color: red"/>
+                    <BiSolidHeart style="color: red" />
                   </el-icon>
                 </template>
-                <template v-else-if="column.prop==='download'">
+                <template v-else-if="column.prop === 'download'">
                   <el-icon class="control-icon" @click="downloadSong(row)">
-                    <BsCloudDownload/>
+                    <BsCloudDownload />
                   </el-icon>
                 </template>
                 <template v-else>
                   {{ row[column.prop] }}
                 </template>
-
-
               </template>
             </el-table-column>
           </el-table>
 
-          <el-empty v-if="!songs.length && !tableLoading" :image-size="200" description="暂无数据"/>
-
+          <el-empty
+            v-if="!songs.length && !tableLoading"
+            :image-size="200"
+            description="暂无数据"
+          />
         </el-scrollbar>
       </div>
     </div>
@@ -96,21 +106,18 @@
 </template>
 
 <script setup>
-import {onMounted, ref} from 'vue'
-import {useStore} from "vuex";
-import {BiSolidHeart} from "vue-icons-plus/bi";
-import {BsCloudDownload} from "vue-icons-plus/bs";
-import {message, messageBox} from "../utils/message.js";
-import {getSongFavorite, unlikeSong} from "../api/manage.js";
+import { onMounted, ref } from "vue";
+import { useStore } from "vuex";
+import { BiSolidHeart } from "vue-icons-plus/bi";
+import { BsCloudDownload } from "vue-icons-plus/bs";
+import { message, messageBox } from "../utils/message.js";
+import { getSongFavorite, unlikeSong } from "../api/manage.js";
 
-const store = useStore()
-const tableLoading = ref(false)
+const store = useStore();
+const tableLoading = ref(false);
 const rowClassName = (row, index) => {
   row.index = index;
-}
-// 默认图片
-const defaultAvatar = 'https://ts1.tc.mm.bing.net/th/id/OIP-C.CDxtKQRYAPTUqYVGxNKuLQHaHa?rs=1&pid=ImgDetMain&o=7&rm=3'
-
+};
 
 // 歌曲列表
 const songs = ref([]);
@@ -144,82 +151,84 @@ const columns = [
     prop: "download",
     width: 100,
   },
-]
-
+];
 
 const playAll = () => {
-  store.commit('SET_TRACK_LIST', songs)
-  store.commit('SET_PLAY_MODE', 0)
-  store.commit('SET_CURRENT_SONG', songs.value[0])
-  store.commit('SET_PLAYING', true)
-}
+  store.commit("SET_TRACK_LIST", songs);
+  store.commit("SET_PLAY_MODE", 0);
+  store.commit("SET_CURRENT_SONG", songs.value[0]);
+  store.commit("SET_PLAYING", true);
+};
 
 // 切换喜欢状态
 const toggleLike = (row) => {
-  messageBox("确定取消收藏这首歌曲吗？取消后该歌曲不会出现在您的喜欢列表中！").then(() => {
-    unlikeSong(row.id).then((res) => {
-      if (res.data.code === 200) {
-        message('取消收藏成功')
-        fetchLikeSongs()
-      }
+  messageBox("确定取消收藏这首歌曲吗？取消后该歌曲不会出现在您的喜欢列表中！")
+    .then(() => {
+      unlikeSong(row.id).then((res) => {
+        if (res.data.code === 200) {
+          message("取消收藏成功");
+          fetchLikeSongs();
+        }
+      });
     })
-  }).catch(() => {
-    message('操作已取消', "info")
-  })
-}
+    .catch(() => {
+      message("操作已取消", "info");
+    });
+};
 
 // 下载歌曲
 const downloadSong = async (row) => {
-  message("正在创建下载链接....", "info")
+  message("正在创建下载链接....", "info");
   try {
     const response = await fetch(row.audioUrl);
     const blob = await response.blob();
     const url = window.URL.createObjectURL(blob);
-    const link = document.createElement('a');
+    const link = document.createElement("a");
     link.href = url;
     link.download = `${row.name}.mp3`; // 自定义文件名
     document.body.appendChild(link);
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    message('链接创建成功，正在调用浏览器下载窗口...', 'success');
+    message("链接创建成功，正在调用浏览器下载窗口...", "success");
   } catch (error) {
-    message('下载失败', 'error');
+    message("下载失败", "error");
   }
-}
-
+};
 
 // 获取歌单歌曲列表
 const fetchLikeSongs = async () => {
-  tableLoading.value = true
-  const res = await getSongFavorite(null)
+  tableLoading.value = true;
+  const res = await getSongFavorite(null);
   if (res.data.code === 200) {
-    songs.value = res.data.data.songs
+    songs.value = res.data.data.songs;
     songs.value.forEach((song) => {
-      song.duration = Math.floor(song.duration / 60) + ':' + (Math.floor(song.duration % 60) < 10 ? '0' + Math.floor(song.duration % 60) : Math.floor(song.duration % 60));
-    })
+      song.duration =
+        Math.floor(song.duration / 60) +
+        ":" +
+        (Math.floor(song.duration % 60) < 10
+          ? "0" + Math.floor(song.duration % 60)
+          : Math.floor(song.duration % 60));
+    });
   }
-  tableLoading.value = false
-}
-
+  tableLoading.value = false;
+};
 
 const playSong = (row) => {
-  store.commit('SET_CURRENT_SONG', row);
+  store.commit("SET_CURRENT_SONG", row);
   store.commit("ADD_SONG_TO_USER_PLAYLIST", row);
   store.commit("SET_PLAYING", true);
-}
+};
 
 onMounted(() => {
-  fetchLikeSongs()
-})
+  fetchLikeSongs();
+});
 </script>
 
 <style scoped>
-
 .tabs-section {
   margin-top: 10px;
 }
-
 
 .like-detail {
   min-height: calc(100vh - 120px);
@@ -260,7 +269,6 @@ onMounted(() => {
   position: relative;
   padding-top: 80px;
 }
-
 
 .meta-item {
   display: block;
@@ -333,7 +341,7 @@ onMounted(() => {
   overflow: hidden;
 }
 
-/deep/ .el-table__inner-wrapper:before {
+:deep(.el-table__inner-wrapper):before {
   background-color: transparent;
   position: relative;
 }
@@ -403,7 +411,7 @@ onMounted(() => {
 
 .comment-user {
   font-size: 14px;
-  color: #409EFF;
+  color: #409eff;
   font-weight: 500;
 }
 
@@ -447,6 +455,4 @@ onMounted(() => {
   font-size: 12px;
   color: #999;
 }
-
-
 </style>

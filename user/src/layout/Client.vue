@@ -2,26 +2,25 @@
   <div class="common-layout">
     <el-container>
       <el-aside :style="{ width: isCollapse ? '64px' : '230px' }">
-        <f-menu v-model:is-collapse="isCollapse"/>
+        <f-menu v-model:is-collapse="isCollapse" />
       </el-aside>
 
       <el-container>
         <el-header>
-          <f-header/>
+          <f-header />
         </el-header>
 
         <el-main>
-          <router-view v-slot="{ Component,route }">
+          <router-view v-slot="{ Component, route }">
             <transition mode="out-in" name="fade">
-              <component :is="Component" :key="route.path"/>
+              <component :is="Component" :key="route.path" />
             </transition>
           </router-view>
         </el-main>
 
         <el-footer>
-          <f-footer/>
+          <f-footer />
         </el-footer>
-
       </el-container>
     </el-container>
   </div>
@@ -31,7 +30,7 @@
 import FHeader from "./components/Fheader.vue";
 import FMenu from "./components/Fmenu.vue";
 import FFooter from "./components/Ffooter.vue";
-import {ref} from "vue";
+import { ref } from "vue";
 const isCollapse = ref(false);
 </script>
 
@@ -83,5 +82,4 @@ const isCollapse = ref(false);
 .fade-leave-to {
   opacity: 0;
 }
-
 </style>

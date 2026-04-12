@@ -4,25 +4,25 @@
     <div class="like-header">
       <div class="search-section">
         <el-input
-            v-model="searchForm.title"
-            clearable
-            placeholder="搜索歌单..."
-            prefix-icon="Search"
-            style="width: 300px"
-            @clear="handleInputClear"
-            @keyup.enter="handleSearch"
+          v-model="searchForm.title"
+          clearable
+          placeholder="搜索歌单..."
+          prefix-icon="Search"
+          style="width: 300px"
+          @clear="handleInputClear"
+          @keyup.enter="handleSearch"
         />
         <el-button type="primary" @click="handleSearch">搜索</el-button>
       </div>
       <div>
         <el-select
-            v-model="searchForm.styleId"
-            :options="styleOptions"
-            clearable
-            default-first-option
-            placeholder="请选择风格(单选)"
-            @change="handleStyleChange"
-            @clear="handleStyleClear"
+          v-model="searchForm.styleId"
+          :options="styleOptions"
+          clearable
+          default-first-option
+          placeholder="请选择风格(单选)"
+          @change="handleStyleChange"
+          @clear="handleStyleClear"
         />
       </div>
     </div>
@@ -31,15 +31,15 @@
       <el-scrollbar height="610">
         <div class="playlist-grid">
           <div
-              v-for="playlist in playlists"
-              :key="playlist.id"
-              v-loading="loading"
-              class="playlist-item"
-              @click="handleClick(playlist)"
+            v-for="playlist in playlists"
+            :key="playlist.id"
+            v-loading="loading"
+            class="playlist-item"
+            @click="handleClick(playlist)"
           >
             <div class="playlist-cover">
-              <el-image :src="playlist.coverUrl" alt="封面"/>
-              <div class="play-btn"/>
+              <el-image :src="playlist.coverUrl" alt="封面" />
+              <div class="play-btn" />
             </div>
             <div class="playlist-info">
               <h3 class="playlist-title">{{ playlist.title }}</h3>
@@ -48,163 +48,162 @@
             </div>
           </div>
         </div>
-        <el-empty v-if="playlists.length === 0" description="暂无数据"/>
+        <el-empty v-if="playlists.length === 0" description="暂无数据" />
       </el-scrollbar>
     </div>
 
     <!-- 分页 -->
     <div class="pagination-section" v-if="playlists.length !== 0">
       <el-pagination
-          :current-page="currentPage"
-          :page-size="pageSize"
-          :page-sizes="[12, 24, 36]"
-          :total="total"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="handleSizeChange"
-          @current-change="handleCurrentChange"
+        :current-page="currentPage"
+        :page-size="pageSize"
+        :page-sizes="[12, 24, 36]"
+        :total="total"
+        layout="total, sizes, prev, pager, next, jumper"
+        @size-change="handleSizeChange"
+        @current-change="handleCurrentChange"
       />
     </div>
   </div>
 </template>
 
 <script setup>
-import {onMounted, reactive, ref} from 'vue'
-import {BiPlay} from "vue-icons-plus/bi";
-import {getAllPlaylists} from "../api/manage.js";
-import {useRouter} from "vue-router";
-import {useStore} from "vuex";
-import {fetchFavoritePlaylists} from "../utils/userFavorite.js";
-import {checkLogin} from "../utils/auth.js";
-import {message} from "../utils/message.js";
+import { onMounted, reactive, ref } from "vue";
+import { BiPlay } from "vue-icons-plus/bi";
+import { getAllPlaylists } from "../api/manage.js";
+import { useRouter } from "vue-router";
+import { useStore } from "vuex";
+import { fetchFavoritePlaylists } from "../utils/userFavorite.js";
+import { checkLogin } from "../utils/auth.js";
+import { message } from "../utils/message.js";
 
 const searchForm = reactive({
   title: null,
   styleId: null,
   pageNum: 1,
-  pageSize: 12
-})
+  pageSize: 12,
+});
 const styleOptions = [
   {
     label: "全部",
-    value: null
+    value: null,
   },
   {
     label: "乡村",
-    value: 1
+    value: 1,
   },
   {
     label: "华语流行",
-    value: 2
+    value: 2,
   },
   {
     label: "原声带",
-    value: 3
+    value: 3,
   },
   {
     label: "古典",
-    value: 4
+    value: 4,
   },
   {
     label: "嘻哈说唱",
-    value: 5
+    value: 5,
   },
   {
     label: "国风",
-    value: 6
+    value: 6,
   },
   {
     label: "国风流行",
-    value: 7
+    value: 7,
   },
   {
     label: "摇滚",
-    value: 8
+    value: 8,
   },
   {
     label: "日本流行",
-    value: 9
+    value: 9,
   },
   {
     label: "朋克",
-    value: 10
+    value: 10,
   },
   {
     label: "欧美流行",
-    value: 11
+    value: 11,
   },
   {
     label: "电子",
-    value: 12
+    value: 12,
   },
   {
     label: "粤语流行",
-    value: 13
+    value: 13,
   },
   {
     label: "节奏布鲁斯",
-    value: 14
+    value: 14,
   },
   {
     label: "轻音乐",
-    value: 15
+    value: 15,
   },
   {
     label: "非洲节拍",
-    value: 16
+    value: 16,
   },
   {
     label: "韩国流行",
-    value: 17
+    value: 17,
   },
-]
-const loading = ref(true)
-const playlists = ref([])
+];
+const loading = ref(true);
+const playlists = ref([]);
 
-const currentPage = ref(1)
-const pageSize = ref(12)
-const total = ref()
-const router = useRouter()
-const store = useStore()
+const currentPage = ref(1);
+const pageSize = ref(12);
+const total = ref();
+const router = useRouter();
+const store = useStore();
 
 const handleSearch = () => {
-  fetchPlaylists()
-}
+  fetchPlaylists();
+};
 
 const handleInputClear = () => {
-  searchForm.title = null
-  fetchPlaylists()
-}
+  searchForm.title = null;
+  fetchPlaylists();
+};
 
 const handleStyleChange = (val) => {
-  searchForm.styleId = val
-  fetchPlaylists()
-
-}
+  searchForm.styleId = val;
+  fetchPlaylists();
+};
 
 const handleStyleClear = () => {
-  searchForm.styleId = null
-  fetchPlaylists()
-}
+  searchForm.styleId = null;
+  fetchPlaylists();
+};
 
 const handleSizeChange = (val) => {
-  pageSize.value = val
-  searchForm.pageSize = val
-  currentPage.value = 1
-  fetchPlaylists()
-}
+  pageSize.value = val;
+  searchForm.pageSize = val;
+  currentPage.value = 1;
+  fetchPlaylists();
+};
 
 const handleCurrentChange = (val) => {
-  currentPage.value = val
-  searchForm.pageNum = val
-  fetchPlaylists()
-}
+  currentPage.value = val;
+  searchForm.pageNum = val;
+  fetchPlaylists();
+};
 
 const handleClick = (playlist) => {
-  store.commit('SET_SELECTED_PLAYLIST', playlist)
+  store.commit("SET_SELECTED_PLAYLIST", playlist);
   router.push({
-    path: '/playlist/' + playlist.id,
-  })
-}
+    path: "/playlist/" + playlist.id,
+  });
+};
 
 const fetchPlaylists = async () => {
   loading.value = true;
@@ -214,11 +213,11 @@ const fetchPlaylists = async () => {
     total.value = res.data.data.total;
   }
   loading.value = false;
-}
+};
 
 onMounted(() => {
   fetchPlaylists();
-})
+});
 </script>
 
 <style scoped>
@@ -245,10 +244,8 @@ onMounted(() => {
   }
 }
 
-
 .playlist-section {
   margin-top: 50px;
-
 }
 
 .playlist-grid {
@@ -305,7 +302,7 @@ onMounted(() => {
 }
 
 .playlist-item:hover .play-btn::after {
-  content: '▷';
+  content: "▷";
   font-size: 18px;
   font-weight: bolder;
   position: absolute;
@@ -334,7 +331,6 @@ onMounted(() => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
-
 
 .pagination-section {
   display: flex;
