@@ -382,7 +382,6 @@ const previousSong = () => {
     fetchFavorite();
   } else {
     audioRef.value.currentTime = 0;
-    audioRef.value.play();
   }
 };
 
@@ -399,7 +398,6 @@ const nextSong = () => {
     fetchFavorite();
   }
   audioRef.value.currentTime = 0;
-  audioRef.value.play();
 };
 
 // 切换收藏
@@ -464,6 +462,7 @@ const formatTime = (time) => {
 watchEffect(() => {
   const isPlaying = localIsPlaying.value;
   const song = localCurrentSong.value;
+  const volume = localVolume.value;
   if (isPlaying && song && song.id && audioRef.value) {
     if (!song.audioUrl) {
       message("该歌曲暂无音频，已停止播放", "error");
@@ -473,6 +472,9 @@ watchEffect(() => {
     nextTick(() => {
       const playPromise = audioRef.value.play();
       if (playPromise !== undefined) {
+        playPromise.then(() => {
+          audioRef.value.volume = volume / 100;
+        });
         playPromise.catch((error) => {
           // 忽略 AbortError
           if (error.name === "NotAllowedError") {
@@ -490,6 +492,7 @@ watchEffect(() => {
     audioRef.value.pause();
   }
 });
+
 </script>
 
 <style scoped>

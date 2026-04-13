@@ -1,6 +1,15 @@
 import {createStore} from "vuex";
 import createPersistedState from "vuex-persistedstate";
-import {getPlaylistFavorite, getUserInfo, login, logout, register, updateUserInfo,} from "../api/manage.js";
+import {
+    getCode,
+    getPlaylistFavorite,
+    getUserInfo,
+    login,
+    logout,
+    register,
+    resetPwd,
+    updateUserInfo,
+} from "../api/manage.js";
 import {message} from "../utils/message.js";
 
 // 创建一个新的 store 实例
@@ -139,8 +148,17 @@ const store = createStore({
     },
 
     actions: {
+        async userGetCode({commit}, email) {
+            await getCode(email).then((res) => {
+                if (res.data.code === 200) {
+                    message("验证码已发送");
+                } else {
+                    throw new Error("获取验证码失败");
+                }
+            });
+        },
         async userLogin({commit}, loginForm) {
-            await login(loginForm).then(async (res) => {
+            await login(loginForm).then((res) => {
                 if (res.data.code === 200) {
                     commit("SET_IS_LOGIN", true);
                     message("登录成功");
@@ -150,11 +168,20 @@ const store = createStore({
             });
         },
         async userRegister({commit}, registerForm) {
-            await register(registerForm).then(async (res) => {
+            await register(registerForm).then((res) => {
                 if (res.data.code === 200) {
                     message("注册成功，请登录");
                 } else {
                     throw new Error("注册失败");
+                }
+            });
+        },
+        async userResetPwd({commit}, resetPwdForm) {
+            await resetPwd(resetPwdForm).then((res) => {
+                if (res.data.code === 200) {
+                    message("重置密码成功，请登录");
+                } else {
+                    throw new Error("重置密码失败");
                 }
             });
         },

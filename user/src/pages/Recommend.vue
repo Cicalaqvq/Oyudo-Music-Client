@@ -13,7 +13,7 @@
         <el-carousel-item
           v-for="banner in banners"
           :key="banner.id"
-          style="height: 300px"
+          style="height: 275px"
         >
           <div class="banner-item">
             <el-image :src="banner.bannerUrl" class="banner-image" lazy />

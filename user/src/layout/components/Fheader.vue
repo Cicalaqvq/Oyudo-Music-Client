@@ -51,7 +51,7 @@
           <el-icon>
             <UserFilled/>
           </el-icon>
-          <span class="font">登录</span>
+          <span class="redirect-button">登录</span>
         </el-button>
       </div>
     </div>

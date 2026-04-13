@@ -144,6 +144,10 @@ export function updateUserInfo(userForm) {
     return request.put("/user/updateUser", userForm);
 }
 
+export function resetPwd(resetPwdForm) {
+    return request.put("/user/resetPwd", resetPwdForm);
+}
+
 export function addComment(commentForm) {
     return request.post("/user/addComment", commentForm);
 }

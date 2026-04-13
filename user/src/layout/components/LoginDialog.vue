@@ -1,16 +1,21 @@
 <template>
   <el-dialog
       v-model="store.state.SHOW_LOGIN_DIALOG"
-      width="20%"
+      :title="dialogTitle"
+      width="500px"
       @close="handleClose"
+
   >
-    <el-tabs v-model="activeName" @tab-click="handleTabChange">
+    <el-tabs
+        v-model="activeName"
+        @tab-click="handleTabChange"
+    >
       <el-tab-pane label="登录" name="login">
         <div
             v-if="loginType === 1"
-            style="padding-bottom: 10px; text-align: center"
+            style="margin-top: 20px;text-align: center"
         >
-          <span class="font">使用验证码登录时，未注册用户将自动注册</span>
+          <span style="font-size: 15px">使用验证码登录时，未注册用户将自动注册</span>
         </div>
         <div class="login-form">
           <el-form ref="loginFormRef" :model="loginForm" :rules="loginRules">
@@ -53,7 +58,7 @@
                   type="password"
               />
             </el-form-item>
-            <div style="display: flex; justify-content: space-between">
+            <div style="padding-bottom: 10px;display: flex; justify-content: space-between">
               <div v-if="loginType === 1">
                 <el-button type="text" @click="loginType = 0"
                 >使用密码登录
@@ -66,7 +71,7 @@
                 </el-button
                 >
               </div>
-              <button class="font" @click="openResetPwd">忘记密码？</button>
+              <el-button style="color: #7f7f7f" type="text" @click="activeName = 'resetPwd'">忘记密码？</el-button>
             </div>
           </el-form>
         </div>
@@ -77,7 +82,7 @@
             </el-button
             >
           </div>
-          <div class="font" style="margin-top: 10px">
+          <div class="redirect-button">
             没有账户？
             <button style="color: blue" @click="activeName = 'register'">注册</button>
           </div>
@@ -102,13 +107,14 @@
             </el-form-item>
             <el-form-item prop="code">
               <el-input
-                  v-model="loginForm.code"
+                  v-model="registerForm.code"
                   :prefix-icon="Lock"
                   placeholder="验证码"
                   style="max-width: 400px"
               >
                 <template #append>
-                  <el-button v-if="!isSendCode" slot="append" @click="sendCode"
+                  <el-button v-if="!isSendCode" slot="append" v-loading="sendCodeLoading"
+                             @click="sendCode"
                   >获取验证码
                   </el-button
                   >
@@ -150,13 +156,79 @@
             </el-button
             >
           </div>
-          <div class="font" style="margin-top: 10px">
+          <div class="redirect-button">
             已有账户？
             <button style="color: blue" @click="activeName = 'login'">登录</button>
           </div>
         </div>
       </el-tab-pane>
-      <el-tab-pane label="重置密码" name="resetPwd">重置密码</el-tab-pane>
+      <el-tab-pane label="重置密码" name="resetPwd">
+        <div class="login-form">
+          <el-form ref="resetPwdFormRef" :model="resetPwdForm" :rules="resetPwdRules">
+            <el-form-item prop="email">
+              <el-input
+                  v-model="resetPwdForm.email"
+                  :prefix-icon="Message"
+                  placeholder="邮箱"
+              />
+            </el-form-item>
+            <el-form-item prop="code">
+              <el-input
+                  v-model="resetPwdForm.code"
+                  :prefix-icon="Lock"
+                  placeholder="验证码"
+                  style="max-width: 400px"
+              >
+                <template #append>
+                  <el-button v-if="!isSendCode" slot="append" v-loading="sendCodeLoading"
+                             @click="sendCode"
+                  >获取验证码
+                  </el-button
+                  >
+                  <el-button v-else slot="append" disabled>
+                    <el-countdown
+                        :value="countDownTime"
+                        format="ss"
+                        value-style="color:#606266;font-size: 16px"
+                        @finish="isSendCode = false"
+                    />
+                  </el-button>
+                </template>
+              </el-input>
+            </el-form-item>
+            <el-form-item prop="password">
+              <el-input
+                  v-model="resetPwdForm.newPassword"
+                  :prefix-icon="Lock"
+                  placeholder="新密码"
+                  show-password
+                  type="password"
+              />
+            </el-form-item>
+            <el-form-item prop="confirmPassword">
+              <el-input
+                  v-model="resetPwdForm.confirmPassword"
+                  :prefix-icon="Lock"
+                  placeholder="确认密码"
+                  show-password
+                  type="password"
+              />
+            </el-form-item>
+          </el-form>
+        </div>
+        <div class="login-form-footer">
+          <div>
+            <el-button v-loading="loading" type="primary" @click="userResetPwd"
+            >重置密码
+            </el-button
+            >
+          </div>
+          <div class="redirect-button" style="margin-top: 10px">
+            记起密码了？
+            <button style="color: blue" @click="activeName = 'login'">返回登录</button>
+          </div>
+        </div>
+      </el-tab-pane>
     </el-tabs>
   </el-dialog>
 </template>
@@ -164,15 +236,26 @@
 import {Lock, Message, User} from "@element-plus/icons-vue";
 import {useStore} from "vuex";
 import {computed, reactive, ref} from "vue";
-import {getMailCode} from "../../utils/auth.js";
 
 const store = useStore();
 const activeName = ref("login");
+const dialogTitle = computed(() => {
+  switch (activeName.value) {
+    case "login":
+      return "登录";
+    case "register":
+      return "注册";
+    case "resetPwd":
+      return "重置密码";
+  }
+})
 const loginType = ref(0);
 const isSendCode = ref(false);
 const loading = ref(false);
+const sendCodeLoading = ref(false);
 const loginFormRef = ref(null);
 const registerFormRef = ref(null);
+const resetPwdFormRef = ref(null);
 const countDownTime = ref(Date.now() + 2 * 60 * 1000);
 
 const handleOpen = () => {
@@ -182,6 +265,10 @@ const handleOpen = () => {
 
 const handleClose = () => {
   store.commit("SET_SHOW_LOGIN_DIALOG", false);
+  loginFormRef.value.resetFields();
+  registerFormRef.value.resetFields();
+  resetPwdFormRef.value.resetFields();
+  activeName.value = "login";
 };
 
 const loginForm = reactive({
@@ -196,6 +283,13 @@ const registerForm = reactive({
   email: "",
   code: "",
   password: "",
+  confirmPassword: "",
+});
+
+const resetPwdForm = reactive({
+  email: "",
+  code: "",
+  newPassword: "",
   confirmPassword: "",
 });
 
@@ -239,12 +333,39 @@ const registerRules = {
   ],
 }
 
+const resetPwdRules = {
+  email: [
+    {required: true, message: "请输入邮箱", trigger: "blur"},
+    {
+      type: "email",
+      message: "请输入正确的邮箱地址",
+      trigger: ["blur", "change"],
+    },
+  ],
+  code: [{required: true, message: "请输入验证码", trigger: "blur"}],
+  newPassword: [{required: true, message: "请输入密码", trigger: "blur"}],
+  confirmPassword: [
+    {required: true, message: "请输入确认密码", trigger: "blur"},
+    {
+      validator: (rule, value, callback) => {
+        if (value !== resetPwdForm.newPassword) {
+          callback(new Error("两次输入的密码不一致"));
+        } else {
+          callback();
+        }
+      },
+      trigger: "blur",
+    },
+  ]
+}
+
 const userLogin = () => {
   loading.value = true;
   loginFormRef.value
       .validate()
       .then(async () => {
         await store.dispatch("userLogin", loginForm);
+        loginFormRef.value.resetFields();
         store.commit("SET_SHOW_LOGIN_DIALOG", false);
         await store.dispatch("getUserInfo");
         await store.dispatch("getUserFavoritePlaylists");
@@ -259,7 +380,9 @@ const userRegister = () => {
   registerFormRef.value
       .validate()
       .then(async () => {
-        await store.dispatch("userRegister", registerForm)
+        await store.dispatch("userRegister", registerForm);
+        loginForm.email = registerForm.email;
+        registerFormRef.value.resetFields();
         activeName.value = "login";
       })
       .finally(() => {
@@ -267,19 +390,57 @@ const userRegister = () => {
       });
 };
 
+const userResetPwd = () => {
+  loading.value = true;
+  resetPwdFormRef.value.validate().then(async () => {
+    await store.dispatch("userResetPwd", resetPwdForm);
+    loginForm.email = resetPwdForm.email;
+    resetPwdFormRef.value.resetFields();
+    activeName.value = "login";
+  }).finally(() => {
+    loading.value = false;
+  });
+
+};
+
 const sendCode = () => {
-  loginFormRef.value.validateField("email").then(async () => {
-    const res = await getMailCode(loginForm.email);
+  let formRef;
+  let form;
+
+  switch (activeName.value) {
+    case 'login':
+      formRef = loginFormRef;
+      form = loginForm;
+      break;
+    case 'register':
+      formRef = registerFormRef;
+      form = registerForm;
+      break;
+    case 'resetPwd':
+      formRef = resetPwdFormRef;
+      form = resetPwdForm;
+      break;
+    default:
+      return;
+  }
+
+  if (!formRef || !formRef.value) {
+    console.warn('表单引用未就绪');
+    return;
+  }
+  sendCodeLoading.value = true;
+  console.log(formRef.value)
+  formRef.value.validateField("email").then(async () => {
+    const res = await store.dispatch("userGetCode", form.email);
     if (res) {
       isSendCode.value = true;
       countDownTime.value = Date.now() + 2 * 60 * 1000;
     }
+  }).finally(() => {
+    sendCodeLoading.value = false;
   });
 };
 
-const openResetPwd = () => {
-  activeName.value = "resetPwd";
-};
 
 const handleTabChange = () => {
   isSendCode.value = false;
@@ -294,29 +455,49 @@ defineExpose({handleOpen});
   text-align: center;
 }
 
+:deep(.el-tabs__item) {
+  flex: 1;
+  text-align: center;
+}
+
+:deep(.el-tabs__nav ) {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+:deep(.el-tab-pane) {
+  width: 75%;
+  min-height: 300px;
+}
+
+.login-form {
+
+  .el-form {
+    padding-top: 20px;
+  }
+
+  .el-form-item {
+    margin-bottom: 20px;
+  }
+
+}
+
+.redirect-button {
+  font-size: 14px;
+  margin-top: 20px;
+  padding-bottom: 20px;
+}
+
 .login-form-footer {
   display: flex;
   text-align: center;
   flex-direction: column;
 
   .el-button {
-    margin-top: 10px;
-    width: 80%;
+    width: 100%;
   }
 }
 
-.login-form {
-  .el-form-item {
-    margin-bottom: 20px;
-  }
 
-  .font {
-    font-size: 12px;
-  }
-}
-
-:deep(.el-tabs__item) {
-  padding-left: 25px;
-  margin-left: 25px;
-}
 </style>
