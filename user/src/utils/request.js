@@ -1,7 +1,7 @@
 import axios from "axios";
 import {message, notification} from "./message.js";
 import {getCookies, removeCookies, removeLoginState} from "./auth.js";
-import {useStore} from "vuex";
+import store from "../store/index.js";
 
 const request = axios.create({
     baseURL: "/api", // 配置baseURL
@@ -36,7 +36,7 @@ request.interceptors.response.use(
             if (code === 401) {
                 message("登录已过期", "warning");
                 removeCookies();
-                removeLoginState(useStore());
+                removeLoginState(store);
             } else if (code === 500) {
                 message(response.data.msg || "请求失败", "error");
             } else if (code === 404) {

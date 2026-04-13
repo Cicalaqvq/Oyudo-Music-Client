@@ -2,7 +2,7 @@ import {createRouter, createWebHistory} from "vue-router";
 import {hideFullLoading, showFullLoading} from "../utils/fullLoading.js";
 import {getCookies, removeLoginState} from "../utils/auth.js";
 import {message} from "../utils/message.js";
-import {useStore} from "vuex";
+import store from "../store/index.js";
 
 const routes = [
     {
@@ -82,14 +82,14 @@ export const router = createRouter({
 // 设置全局路由守卫
 router.beforeEach(async (to, from, next) => {
     showFullLoading();
-    const store = useStore();
-    const token = getCookies();
-    if (token && localStorage.getItem("UserStore") === null) {
-        await store.dispatch("userLogout");
-    }
-    if (!token) {
-        removeLoginState(store);
-    }
+    try {
+        const token = getCookies();
+        if (token && localStorage.getItem("UserStore") === null) {
+            await store.dispatch("userLogout");
+        }
+        if (!token) {
+            removeLoginState(store);
+        }
         if (to.path === "/like" || to.path === "/user") {
             if (!token) {
                 message("请先登录", "warning");
@@ -99,8 +99,12 @@ router.beforeEach(async (to, from, next) => {
                 return;
             }
         }
-    document.title = "Oyudo Music" + " - " + (to.meta.title || "无标题");
-    next();
+        document.title = "Oyudo Music" + " - " + (to.meta.title || "无标题");
+        next();
+    } catch (e) {
+        hideFullLoading();
+        next(false);
+    }
 });
 
 router.afterEach((to, from) => {

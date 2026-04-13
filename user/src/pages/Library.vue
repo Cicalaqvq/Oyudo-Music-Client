@@ -180,7 +180,9 @@ const playSong = (row) => {
 
 const fetchSongs = async () => {
   tableLoading.value = true;
-  console.log(searchForm)
+  if (searchQuery.value) {
+    searchForm.name = searchQuery.value;
+  }
   await getAllSongs(searchForm)
       .then((res) => {
         if (res.data.code === 200) {

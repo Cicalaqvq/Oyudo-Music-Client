@@ -6,8 +6,8 @@
       </div>
     </template>
     <el-form
-        :model="userForm"
         ref="userFormRef"
+        :model="userForm"
         :rules="userFormRules"
         label-position="top"
     >
@@ -31,10 +31,10 @@
       <el-form-item label="简介" prop="introduction">
         <el-input
             v-model="userForm.introduction"
+            :rows="3"
             maxlength="100"
             placeholder="请输入简介"
             resize="none"
-            :rows="3"
             show-word-limit
             type="textarea"
         >
@@ -47,28 +47,27 @@
         <el-button type="danger" @click="reset">注销账号</el-button>
       </div>
     </template>
-  </el-card>
-
-  <el-dialog
-      v-model="showDialogVisible"
-      title="验证邮箱"
-      width="auto"
-      @close="closeDialog"
-  >
-    <el-form
-        ref="authEmailFormRef"
-        :model="authEmailForm"
-        :rules="authEmailFormRules"
+    <el-dialog
+        v-model="showDialogVisible"
+        title="验证邮箱"
+        width="auto"
+        @close="closeDialog"
     >
-      <el-form-item label="邮箱" prop="email">
-        <el-input v-model="authEmailForm.email" disabled/>
-      </el-form-item>
-      <el-form-item label="验证码" prop="code">
-        <el-input v-model="authEmailForm.code" placeholder="请输入验证码"/>
-      </el-form-item>
-    </el-form>
-  </el-dialog>
-  <img-cropper ref="imgCropperRef" @crop-complete="cropComplete"/>
+      <el-form
+          ref="authEmailFormRef"
+          :model="authEmailForm"
+          :rules="authEmailFormRules"
+      >
+        <el-form-item label="邮箱" prop="email">
+          <el-input v-model="authEmailForm.email" disabled/>
+        </el-form-item>
+        <el-form-item label="验证码" prop="code">
+          <el-input v-model="authEmailForm.code" placeholder="请输入验证码"/>
+        </el-form-item>
+      </el-form>
+    </el-dialog>
+    <img-cropper ref="imgCropperRef" @crop-complete="cropComplete"/>
+  </el-card>
 </template>
 <script setup>
 import {nextTick, onMounted, reactive, ref} from "vue";
@@ -129,7 +128,7 @@ const authEmailFormRules = {
   code: [{required: true, message: "请输入验证码", trigger: "change"}],
 };
 const commit = async () => {
-  const valid = userFormRef.value.validate();
+  const valid = await userFormRef.value?.validate().catch(() => false);
   if (!valid) {
     return false;
   }
@@ -160,12 +159,22 @@ const closeDialog = () => {
     showDialogVisible.value = false;
     userForm.email = store.state.USER_INFO.email;
     message("邮箱信息已恢复", "info");
+  }).catch(() => {
   });
+};
+
+const reset = async () => {
+  await messageBox("确定要注销账号吗？", "提示", "warning");
+  await store.dispatch("userLogout");
 };
 
 const initData = () => {
   nextTick(() => {
+    if (!store.state.USER_INFO) {
+      return;
+    }
     Object.assign(userForm, store.state.USER_INFO);
+    authEmailForm.email = store.state.USER_INFO.email;
   });
 };
 

@@ -1,6 +1,4 @@
 import {useCookies} from "@vueuse/integrations/useCookies";
-import {getCode} from "../api/manage.js";
-import {message} from "./message.js";
 
 const cookie = useCookies();
 

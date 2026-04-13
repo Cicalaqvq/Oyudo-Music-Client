@@ -48,10 +48,14 @@
           </el-table-column>
           <el-table-column label="状态" width="100">
             <template #default="{ row }">
-              <el-switch v-model="row.status"
-                         inline-prompt
-                         style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
-                         @change="(value) => handleStatusChange(row, value)"/>
+              <el-switch
+                  ref="switchRef"
+                  v-model="row.status"
+                  v-loading="loading"
+                  inline-prompt
+                  style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
+                  @change="(value) => handleStatusChange(row, value)"
+              />
             </template>
           </el-table-column>
           <el-table-column label="操作" width="180">
@@ -149,7 +153,8 @@ const rules = {
   ],
 }
 
-const formRef = ref();
+const formRef = ref(null);
+const switchRef = ref(null);
 
 // 搜索相关
 const searchForm = reactive({
@@ -228,10 +233,10 @@ const handleStatusChange = (row, value) => {
       } else {
         message("用户已禁用，禁止登录客户端", 'warning');
       }
-      fetchUserList();
     }
   }).finally(() => {
     loading.value = false;
+    fetchUserList();
   })
 };
 

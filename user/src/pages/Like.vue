@@ -4,9 +4,14 @@
     <div class="playlist-info">
       <div class="like-avatar">
         <el-image
-          v-if="songs.length"
-          :src="songs[0].coverUrl || '/defaultSongCover.png'"
-          style="width: 100%; height: 100%; object-fit: cover"
+            v-if="songs.length"
+            :src="songs[0].coverUrl || '/defaultSongCover.png'"
+            style="width: 100%; height: 100%; object-fit: cover"
+        />
+        <el-image
+            v-else
+            src="/defaultSongCover.png"
+            style="width: 100%; height: 100%; object-fit: cover"
         />
       </div>
       <div class="like-content">
@@ -18,10 +23,10 @@
         </div>
         <div class="like-footer">
           <el-button
-            class="play-button"
-            style="width: 100px"
-            type="primary"
-            @click="playAll"
+              class="play-button"
+              style="width: 100px"
+              type="primary"
+              @click="playAll"
           >
             <span style="font-size: 12px">▷ 播放全部</span>
           </el-button>
@@ -34,42 +39,42 @@
       <div class="song-list">
         <el-scrollbar height="auto">
           <el-table
-            v-if="songs.length"
-            v-loading="tableLoading"
-            :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
-            :data="songs"
-            :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
-            :row-class-name="rowClassName"
-            :tooltip-options="{
+              v-if="songs.length"
+              v-loading="tableLoading"
+              :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
+              :data="songs"
+              :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
+              :row-class-name="rowClassName"
+              :tooltip-options="{
               placement: 'top',
               offset: -20,
               effect: 'light',
             }"
-            element-loading-text="Loading..."
-            height="550"
-            style="width: 100%; font-size: 12px"
-            @row-dblclick="playSong"
+              element-loading-text="Loading..."
+              height="550"
+              style="width: 100%; font-size: 12px"
+              @row-dblclick="playSong"
           >
             >
             <el-table-column
-              v-for="column in columns"
-              :key="column.prop"
-              :label="column.label"
-              :prop="column.prop"
-              :show-overflow-tooltip="true"
-              :width="column.width || 'auto'"
+                v-for="column in columns"
+                :key="column.prop"
+                :label="column.label"
+                :prop="column.prop"
+                :show-overflow-tooltip="true"
+                :width="column.width || 'auto'"
             >
               <template #default="{ row }">
                 <template v-if="column.slot">
                   <div class="song-info">
                     <div class="song-cover">
                       <el-image
-                        :preview-src-list="[row.coverUrl]"
-                        :preview-teleported="true"
-                        :show-progress="true"
-                        :src="row.coverUrl"
-                        alt="Song"
-                        style="width: 45px; height: 45px"
+                          :preview-src-list="[row.coverUrl]"
+                          :preview-teleported="true"
+                          :show-progress="true"
+                          :src="row.coverUrl"
+                          alt="Song"
+                          style="width: 45px; height: 45px"
                       >
                       </el-image>
                     </div>
@@ -79,12 +84,12 @@
 
                 <template v-else-if="column.prop === 'like'">
                   <el-icon class="control-icon" @click="toggleLike(row)">
-                    <BiSolidHeart style="color: red" />
+                    <BiSolidHeart style="color: red"/>
                   </el-icon>
                 </template>
                 <template v-else-if="column.prop === 'download'">
                   <el-icon class="control-icon" @click="downloadSong(row)">
-                    <BsCloudDownload />
+                    <BsCloudDownload/>
                   </el-icon>
                 </template>
                 <template v-else>
@@ -95,9 +100,9 @@
           </el-table>
 
           <el-empty
-            v-if="!songs.length && !tableLoading"
-            :image-size="200"
-            description="暂无数据"
+              v-if="!songs.length && !tableLoading"
+              :image-size="200"
+              description="暂无数据"
           />
         </el-scrollbar>
       </div>
@@ -106,12 +111,12 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
-import { useStore } from "vuex";
-import { BiSolidHeart } from "vue-icons-plus/bi";
-import { BsCloudDownload } from "vue-icons-plus/bs";
-import { message, messageBox } from "../utils/message.js";
-import { getSongFavorite, unlikeSong } from "../api/manage.js";
+import {onMounted, ref} from "vue";
+import {useStore} from "vuex";
+import {BiSolidHeart} from "vue-icons-plus/bi";
+import {BsCloudDownload} from "vue-icons-plus/bs";
+import {message, messageBox} from "../utils/message.js";
+import {getSongFavorite, unlikeSong} from "../api/manage.js";
 
 const store = useStore();
 const tableLoading = ref(false);
@@ -154,6 +159,10 @@ const columns = [
 ];
 
 const playAll = () => {
+  if (!songs.value.length) {
+    message("请先收藏一些歌曲", "info");
+    return;
+  }
   store.commit("SET_TRACK_LIST", songs);
   store.commit("SET_PLAY_MODE", 0);
   store.commit("SET_CURRENT_SONG", songs.value[0]);
@@ -163,17 +172,17 @@ const playAll = () => {
 // 切换喜欢状态
 const toggleLike = (row) => {
   messageBox("确定取消收藏这首歌曲吗？取消后该歌曲不会出现在您的喜欢列表中！")
-    .then(() => {
-      unlikeSong(row.id).then((res) => {
-        if (res.data.code === 200) {
-          message("取消收藏成功");
-          fetchLikeSongs();
-        }
+      .then(() => {
+        unlikeSong(row.id).then((res) => {
+          if (res.data.code === 200) {
+            message("取消收藏成功");
+            fetchLikeSongs();
+          }
+        });
+      })
+      .catch(() => {
+        message("操作已取消", "info");
       });
-    })
-    .catch(() => {
-      message("操作已取消", "info");
-    });
 };
 
 // 下载歌曲
@@ -204,11 +213,11 @@ const fetchLikeSongs = async () => {
     songs.value = res.data.data.songs;
     songs.value.forEach((song) => {
       song.duration =
-        Math.floor(song.duration / 60) +
-        ":" +
-        (Math.floor(song.duration % 60) < 10
-          ? "0" + Math.floor(song.duration % 60)
-          : Math.floor(song.duration % 60));
+          Math.floor(song.duration / 60) +
+          ":" +
+          (Math.floor(song.duration % 60) < 10
+              ? "0" + Math.floor(song.duration % 60)
+              : Math.floor(song.duration % 60));
     });
   }
   tableLoading.value = false;
