@@ -174,7 +174,7 @@ const handleDownload = async (row) => {
 
 const playSong = (row) => {
   store.commit("SET_CURRENT_SONG", row);
-  store.commit("ADD_SONG_TO_USER_PLAYLIST", row);
+  store.commit("ADD_SONG_TO_TRACK_LIST", row);
   store.commit("SET_PLAYING", true);
 };
 

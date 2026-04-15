@@ -159,7 +159,9 @@
                 </el-popover>
               </div>
             </div>
-            <el-scrollbar height="500px">
+            <el-scrollbar
+                height="500px"
+            >
               <div
                   v-for="song in store.state.TRACK_LIST"
                   v-if="store.state.TRACK_LIST.length"
