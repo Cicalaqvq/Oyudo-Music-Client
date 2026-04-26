@@ -1,81 +1,97 @@
 // 切换收藏
-import { checkLogin } from "./auth.js";
+import {checkLogin} from "./auth.js";
 import {
-  getPlaylistFavorite,
-  getSongFavorite,
-  likePlaylist,
-  likeSong,
-  unlikePlaylist,
-  unlikeSong,
+    getPlaylistFavorite,
+    getSongFavorite,
+    likePlaylist,
+    likeSong,
+    unlikePlaylist,
+    unlikeSong,
 } from "../api/manage.js";
-import { message } from "./message.js";
+import {message} from "./message.js";
+import store from "../store/index.js"
 
-export async function toggleFavoriteSong(store, songIds, isFavoriteOriginal) {
-  if (!checkLogin(store)) {
-    message("请先登录", "warning");
-    store.commit("SET_SHOW_LOGIN_DIALOG", true);
-    return;
-  }
-  const isFavorite = !isFavoriteOriginal;
-  if (isFavorite) {
-    const res = await likeSong(songIds);
-    if (res.data.code === 200) {
-      message("收藏成功");
-      return true;
+export async function toggleFavoriteSong(songs, isFavoriteOriginal) {
+    if (!checkLogin(store)) {
+        message("请先登录", "warning");
+        store.commit("SET_SHOW_LOGIN_DIALOG", true);
+        return;
     }
-  } else {
-    const res = await unlikeSong(songIds);
-    if (res.data.code === 200) {
-      message("取消收藏成功");
-      return false;
+    const isFavorite = !isFavoriteOriginal;
+    if (isFavorite) {
+        const res = await likeSong(songs.map(song => song.id));
+        if (res.data.code === 200) {
+            message("收藏成功");
+            return true;
+        }
+    } else {
+        const res = await unlikeSong(songs.map(song => song.id));
+        if (res.data.code === 200) {
+            message("取消收藏成功");
+            return false;
+        }
     }
-  }
 }
 
 export async function toggleFavoritePlaylist(
-  store,
-  playlistIds,
-  isFavoriteOriginal,
+    store,
+    playlist,
+    isFavoriteOriginal,
 ) {
-  if (!checkLogin(store)) {
-    message("请先登录", "warning");
-    store.commit("SET_SHOW_LOGIN_DIALOG", true);
-    return;
-  }
-  const isFavorite = !isFavoriteOriginal;
-  if (isFavorite) {
-    const res = await likePlaylist(playlistIds);
-    if (res.data.code === 200) {
-      message("收藏成功");
-      await store.dispatch("getUserFavoritePlaylists");
-      return true;
+    if (!checkLogin(store)) {
+        message("请先登录", "warning");
+        store.commit("SET_SHOW_LOGIN_DIALOG", true);
+        return;
     }
-  } else {
-    const res = await unlikePlaylist(playlistIds);
-    if (res.data.code === 200) {
-      message("取消收藏成功");
-      await store.dispatch("getUserFavoritePlaylists");
-      return false;
+    const isFavorite = !isFavoriteOriginal;
+    if (isFavorite) {
+        const res = await likePlaylist([playlist.id]);
+        if (res.data.code === 200) {
+            message("收藏成功");
+
+            await store.dispatch("getUserFavoritePlaylists");
+            return true;
+        }
+    } else {
+        const res = await unlikePlaylist([playlist.id]);
+        if (res.data.code === 200) {
+            message("取消收藏成功");
+            await store.dispatch("getUserFavoritePlaylists");
+            return false;
+        }
     }
-  }
 }
 
-export async function fetchFavoriteSongs(store, songIds) {
-  if (!checkLogin(store)) {
+export async function fetchFavoriteSongs(songIds = []) {
+    if (!checkLogin(store)) {
+        return [];
+    }
+    const res = await getSongFavorite(songIds);
+    if (res.data.code === 200) {
+        const songs = res.data.data.songs;
+        if (songs.length > 0) {
+            songs.forEach((song) => {
+                song.duration =
+                    Math.floor(song.duration / 60) +
+                    ":" +
+                    (Math.floor(song.duration % 60) < 10
+                        ? "0" + Math.floor(song.duration % 60)
+                        : Math.floor(song.duration % 60));
+            });
+        }
+        return songs;
+    }
     return [];
-  }
-  const res = await getSongFavorite(songIds);
-  if (res.data.code === 200) {
-    return res.data.data.songs;
-  }
+
 }
 
-export async function fetchFavoritePlaylists(store, playlistIds) {
-  if (!checkLogin(store)) {
+export async function fetchFavoritePlaylists(playlistIds = []) {
+    if (!checkLogin(store)) {
+        return [];
+    }
+    const res = await getPlaylistFavorite(playlistIds);
+    if (res.data.code === 200) {
+        return res.data.data.playlists;
+    }
     return [];
-  }
-  const res = await getPlaylistFavorite(playlistIds);
-  if (res.data.code === 200) {
-    return res.data.data.playlists;
-  }
 }

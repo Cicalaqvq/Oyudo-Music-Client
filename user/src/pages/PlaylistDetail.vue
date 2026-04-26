@@ -1,7 +1,7 @@
 <template>
   <div class="like-detail">
     <div class="like-header">
-      <el-icon class="back-icon" size="24" @click="back">
+      <el-icon class="back-icon" size="24" @click="$router.back()">
         <Back/>
       </el-icon>
     </div>
@@ -9,20 +9,20 @@
     <div class="playlist-info">
       <div class="like-avatar">
         <el-image
-            :alt="playlistData.title"
-            :preview-src-list="[playlistData.coverUrl]"
+            :alt="localPlaylist.title"
+            :preview-src-list="[localPlaylist.coverUrl]"
             :show-progress="true"
-            :src="playlistData.coverUrl || defaultAvatar"
+            :src="localPlaylist.coverUrl || '/defaultSongCover.png'"
             style="width: 100%; height: 100%; object-fit: cover"
         />
       </div>
       <div class="like-content">
-        <h1 class="like-name">{{ playlistData.title }}</h1>
+        <h1 class="like-name">{{ localPlaylist.title }}</h1>
         <div class="like-meta">
           <p class="meta-item">
             <el-tooltip
-                v-if="playlistData.introduction"
-                :content="playlistData.introduction"
+                v-if="localPlaylist.introduction"
+                :content="localPlaylist.introduction"
                 :disabled="isShowTooltip"
                 :offset="-500"
                 :popper-style="{ maxWidth: '550px' }"
@@ -33,7 +33,7 @@
                   class="playlist-description"
                   @mouseenter="visibilityChange($event)"
               >
-                {{ playlistData.introduction || "暂无简介" }}
+                {{ localPlaylist.introduction || "暂无简介" }}
               </div>
             </el-tooltip>
           </p>
@@ -61,7 +61,7 @@
               @click="toggleLikePlaylist"
           >
             <el-icon class="like-icon" size="24">
-              <BiSolidHeart v-if="playlistData.isLike" style="color: red"/>
+              <BiSolidHeart v-if="localPlaylist.isLike" style="color: red"/>
               <BiHeart v-else/>
             </el-icon>
           </el-button>
@@ -90,7 +90,7 @@
                   element-loading-text="Loading..."
                   height="480"
                   style="width: 100%; font-size: 12px"
-                  @row-dblclick="playSong"
+                  @row-dblclick="row => playSongs([row])"
               >
                 >
                 <el-table-column
@@ -127,7 +127,7 @@
                       </el-icon>
                     </template>
                     <template v-else-if="column.prop === 'download'">
-                      <el-icon class="control-icon" @click="downloadSong(row)">
+                      <el-icon class="control-icon" @click="download( row)">
                         <BsCloudDownload/>
                       </el-icon>
                     </template>
@@ -223,9 +223,8 @@ import {onMounted, reactive, ref} from "vue";
 import {useStore} from "vuex";
 import {BiHeart, BiSolidHeart} from "vue-icons-plus/bi";
 import {BsCloudDownload} from "vue-icons-plus/bs";
-import {message} from "../utils/message.js";
 import {useRoute} from "vue-router";
-import {getPlaylistDetail, getSongsOfPlaylist,} from "../api/manage.js";
+import {addScoreToPlaylist, getPlaylistDetail, getSongsOfPlaylist,} from "../api/manage.js";
 import {
   fetchFavoritePlaylists,
   fetchFavoriteSongs,
@@ -233,6 +232,8 @@ import {
   toggleFavoriteSong,
 } from "../utils/userFavorite.js";
 import {fetchPlaylistComments, publishComment, toggleFavoriteComment} from "../utils/userComment.js";
+import {download, playSongs} from "../utils/Song.js";
+
 
 const isShowTooltip = ref(false);
 const routes = useRoute();
@@ -243,16 +244,24 @@ const rowClassName = (row, index) => {
 };
 const activeTab = ref("songs");
 
-// 歌手数据
-const playlistData = reactive({
-  id: routes.params.id,
+// 歌单数据
+const localPlaylist = reactive({
+  id: null,
+  title: "",
+  coverUrl: "",
+  introduction: "",
+  style: "",
+  isLike: false,
 });
+
+const playlistId = ref(routes.params.id);
 
 const commentForm = reactive({
   playlistId: routes.params.id,
   content: "",
   type: 1,
 });
+
 const comments = ref([]);
 
 const formRef = ref(null);
@@ -304,10 +313,6 @@ const columns = [
   },
 ];
 
-const back = () => {
-  window.history.back();
-};
-
 const likeComment = async (commentId) => {
   const res = await toggleFavoriteComment(store, commentId);
   if (res) await fetchComments();
@@ -329,24 +334,17 @@ const visibilityChange = (event) => {
   isShowTooltip.value = evWeight <= contentWeight;
 };
 
-const playAll = () => {
-  store.commit("SET_TRACK_LIST", songs);
-  store.commit("SET_PLAY_MODE", 0);
-  store.commit("SET_CURRENT_SONG", songs.value[0]);
-  store.commit("SET_PLAYING", true);
-};
-
 // 切换歌曲喜欢状态
 const toggleLikeSong = async (row) => {
-  row.isLike = await toggleFavoriteSong(store, [row.id], row.isLike);
+  row.isLike = await toggleFavoriteSong(row, row.isLike);
 };
 
 // 切换歌单喜欢状态
 const toggleLikePlaylist = async () => {
-  playlistData.isLike = await toggleFavoritePlaylist(
+  localPlaylist.isLike = await toggleFavoritePlaylist(
       store,
-      [playlistData.id],
-      playlistData.isLike,
+      localPlaylist,
+      localPlaylist.isLike,
   );
 };
 
@@ -358,49 +356,31 @@ const submitComment = async () => {
   }
 };
 
-// 下载歌曲
-const downloadSong = async (row) => {
-  message("正在创建下载链接....", "info");
-  try {
-    const response = await fetch(row.audioUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${row.name}.mp3`; // 自定义文件名
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    message("链接创建成功，正在调用浏览器下载窗口...", "success");
-  } catch (error) {
-    message("下载失败", "error");
-  }
+const playAll = async () => {
+  await playSongs(songs.value);
+  await addScoreToPlaylist(localPlaylist.id, 1.0);
 };
 
 // 获取歌单详情
 const fetchPlaylistDetail = async () => {
-  if (!store.state.SELECTED_PLAYLIST) {
-    const res = await getPlaylistDetail(playlistData.id);
-    if (res.data.code === 200) {
-      store.commit("SET_SELECTED_PLAYLIST", res.data.data);
-    }
+  const res = await getPlaylistDetail(playlistId.value);
+  if (res.data.code === 200) {
+    const data = res.data.data;
+    localPlaylist.id = data.id;
+    localPlaylist.title = data.title;
+    localPlaylist.coverUrl = data.coverUrl;
+    localPlaylist.introduction = data.introduction;
+    localPlaylist.style = data.style;
+    store.commit("SET_SELECTED_PLAYLIST", data);
+    const favoritePlaylist = await fetchFavoritePlaylists([data.id]);
+    localPlaylist.isLike = favoritePlaylist.length > 0;
   }
-  playlistData.title = store.state.SELECTED_PLAYLIST.title;
-  playlistData.coverUrl =
-      store.state.SELECTED_PLAYLIST.coverUrl || defaultAvatar;
-  playlistData.introduction = store.state.SELECTED_PLAYLIST.introduction;
-  playlistData.style = store.state.SELECTED_PLAYLIST.style;
-  const favoritePlaylist = await fetchFavoritePlaylists(store, [
-    playlistData.id,
-  ]);
-  playlistData.isLike = favoritePlaylist.length > 0;
 };
 
 // 获取歌单歌曲列表
 const fetchPlaylistSongs = async () => {
   tableLoading.value = true;
-  const res = await getSongsOfPlaylist(playlistData.id);
+  const res = await getSongsOfPlaylist(localPlaylist.id);
   if (res.data.code === 200) {
     songs.value = res.data.data;
     songs.value.forEach((song) => {
@@ -418,24 +398,17 @@ const fetchPlaylistSongs = async () => {
 
 // 获取歌单评论
 const fetchComments = async () => {
-  comments.value = (await fetchPlaylistComments(playlistData.id)) || [];
+  comments.value = (await fetchPlaylistComments(localPlaylist.id)) || [];
 };
 
 // 获取用户收藏的歌单歌曲
 const fetchLikeSongs = async () => {
-  const favoriteSongs = await fetchFavoriteSongs(store, []);
+  const favoriteSongs = await fetchFavoriteSongs();
   songs.value.forEach((song) => {
     song.isLike =
         favoriteSongs.find((favoriteSong) => favoriteSong.id === song.id) ||
         false;
   });
-};
-
-// 播放歌曲
-const playSong = (row) => {
-  store.commit("SET_CURRENT_SONG", row);
-  store.commit("ADD_SONG_TO_TRACK_LIST", row);
-  store.commit("SET_PLAYING", true);
 };
 
 const initData = async () => {

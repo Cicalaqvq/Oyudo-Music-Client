@@ -26,7 +26,7 @@
               class="play-button"
               style="width: 100px"
               type="primary"
-              @click="playAll"
+              @click="playSongs(songs)"
           >
             <span style="font-size: 12px">▷ 播放全部</span>
           </el-button>
@@ -53,7 +53,7 @@
               element-loading-text="Loading..."
               height="550"
               style="width: 100%; font-size: 12px"
-              @row-dblclick="playSong"
+              @row-dblclick="(row) => playSongs([row])"
           >
             >
             <el-table-column
@@ -88,7 +88,7 @@
                   </el-icon>
                 </template>
                 <template v-else-if="column.prop === 'download'">
-                  <el-icon class="control-icon" @click="downloadSong(row)">
+                  <el-icon class="control-icon" @click="download( row)">
                     <BsCloudDownload/>
                   </el-icon>
                 </template>
@@ -112,13 +112,13 @@
 
 <script setup>
 import {onMounted, ref} from "vue";
-import {useStore} from "vuex";
 import {BiSolidHeart} from "vue-icons-plus/bi";
 import {BsCloudDownload} from "vue-icons-plus/bs";
 import {message, messageBox} from "../utils/message.js";
-import {getSongFavorite, unlikeSong} from "../api/manage.js";
+import {unlikeSong} from "../api/manage.js";
+import {download, playSongs} from "../utils/Song.js";
+import {fetchFavoriteSongs} from "../utils/userFavorite.js";
 
-const store = useStore();
 const tableLoading = ref(false);
 const rowClassName = (row, index) => {
   row.index = index;
@@ -158,17 +158,6 @@ const columns = [
   },
 ];
 
-const playAll = () => {
-  if (!songs.value.length) {
-    message("请先收藏一些歌曲", "info");
-    return;
-  }
-  store.commit("SET_TRACK_LIST", songs);
-  store.commit("SET_PLAY_MODE", 0);
-  store.commit("SET_CURRENT_SONG", songs.value[0]);
-  store.commit("SET_PLAYING", true);
-};
-
 // 切换喜欢状态
 const toggleLike = (row) => {
   messageBox("确定取消收藏这首歌曲吗？取消后该歌曲不会出现在您的喜欢列表中！")
@@ -185,49 +174,13 @@ const toggleLike = (row) => {
       });
 };
 
-// 下载歌曲
-const downloadSong = async (row) => {
-  message("正在创建下载链接....", "info");
-  try {
-    const response = await fetch(row.audioUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${row.name}.mp3`; // 自定义文件名
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    message("链接创建成功，正在调用浏览器下载窗口...", "success");
-  } catch (error) {
-    message("下载失败", "error");
-  }
-};
-
 // 获取歌单歌曲列表
 const fetchLikeSongs = async () => {
   tableLoading.value = true;
-  const res = await getSongFavorite(null);
-  if (res.data.code === 200) {
-    songs.value = res.data.data.songs;
-    songs.value.forEach((song) => {
-      song.duration =
-          Math.floor(song.duration / 60) +
-          ":" +
-          (Math.floor(song.duration % 60) < 10
-              ? "0" + Math.floor(song.duration % 60)
-              : Math.floor(song.duration % 60));
-    });
-  }
+  songs.value = await fetchFavoriteSongs();
   tableLoading.value = false;
 };
 
-const playSong = (row) => {
-  store.commit("SET_CURRENT_SONG", row);
-  store.commit("ADD_SONG_TO_USER_PLAYLIST", row);
-  store.commit("SET_PLAYING", true);
-};
 
 onMounted(() => {
   fetchLikeSongs();

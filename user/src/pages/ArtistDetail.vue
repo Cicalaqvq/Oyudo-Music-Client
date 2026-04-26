@@ -2,18 +2,18 @@
   <div class="artist-detail">
     <div>
       <el-icon class="back-icon" size="24" @click="back">
-        <Back />
+        <Back/>
       </el-icon>
     </div>
     <!-- 歌手信息区域 -->
     <div class="artist-info">
       <div class="artist-avatar">
         <el-image
-          :alt="artistData.name"
-          :preview-src-list="[artistData.avatar]"
-          :show-progress="true"
-          :src="artistData.avatar || defaultAvatar"
-          style="width: 100%; height: 100%; object-fit: cover"
+            :alt="artistData.name"
+            :preview-src-list="[artistData.avatar]"
+            :show-progress="true"
+            :src="artistData.avatar || defaultAvatar"
+            style="width: 100%; height: 100%; object-fit: cover"
         />
       </div>
       <div class="artist-content">
@@ -30,17 +30,17 @@
           <p class="meta-item">
             <span class="label">简介</span>
             <el-tooltip
-              v-if="artistData.introduction"
-              :content="artistData.introduction"
-              :disabled="isShowTooltip"
-              :offset="-500"
-              :popper-style="{ maxWidth: '550px' }"
-              effect="light"
-              placement="right"
+                v-if="artistData.introduction"
+                :content="artistData.introduction"
+                :disabled="isShowTooltip"
+                :offset="-500"
+                :popper-style="{ maxWidth: '550px' }"
+                effect="light"
+                placement="right"
             >
               <div
-                class="artist-description"
-                @mouseenter="visibilityChange($event)"
+                  class="artist-description"
+                  @mouseenter="visibilityChange($event)"
               >
                 {{ artistData.introduction || "暂无简介" }}
               </div>
@@ -56,42 +56,42 @@
       <p class="sub-title">共{{ songsList.length }}首</p>
       <el-scrollbar height="auto">
         <el-table
-          v-if="songsList.length"
-          v-loading="tableLoading"
-          :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
-          :data="songsList"
-          :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
-          :row-class-name="rowClassName"
-          :tooltip-options="{
+            v-if="songsList.length"
+            v-loading="tableLoading"
+            :cellStyle="{ width: '100%', 'border-bottom': 'none' }"
+            :data="songsList"
+            :header-cell-style="{ width: '100%', 'border-bottom': 'none' }"
+            :row-class-name="rowClassName"
+            :tooltip-options="{
             placement: 'top',
             offset: '-20',
             effect: 'light',
           }"
-          element-loading-text="Loading..."
-          height="480"
-          style="width: 100%; font-size: 12px"
-          @row-dblclick="playSong"
+            element-loading-text="Loading..."
+            height="480"
+            style="width: 100%; font-size: 12px"
+            @row-dblclick="(row) => playSongs([row])"
         >
           >
           <el-table-column
-            v-for="column in columns"
-            :key="column.prop"
-            :label="column.label"
-            :prop="column.prop"
-            :show-overflow-tooltip="true"
-            :width="column.width || 'auto'"
+              v-for="column in columns"
+              :key="column.prop"
+              :label="column.label"
+              :prop="column.prop"
+              :show-overflow-tooltip="true"
+              :width="column.width || 'auto'"
           >
             <template #default="{ row }">
               <template v-if="column.slot">
                 <div class="song-info">
                   <div class="song-cover">
                     <el-image
-                      :preview-src-list="[row.coverUrl]"
-                      :preview-teleported="true"
-                      :show-progress="true"
-                      :src="row.coverUrl"
-                      alt="Song"
-                      style="width: 45px; height: 45px"
+                        :preview-src-list="[row.coverUrl]"
+                        :preview-teleported="true"
+                        :show-progress="true"
+                        :src="row.coverUrl"
+                        alt="Song"
+                        style="width: 45px; height: 45px"
                     >
                     </el-image>
                   </div>
@@ -101,13 +101,13 @@
 
               <template v-else-if="column.prop === 'like'">
                 <el-icon class="control-icon">
-                  <BiSolidHeart v-if="row.isLike" style="color: red" />
-                  <BiHeart v-else />
+                  <BiSolidHeart v-if="row.isLike" style="color: red"/>
+                  <BiHeart v-else/>
                 </el-icon>
               </template>
               <template v-else-if="column.prop === 'download'">
-                <el-icon class="control-icon" @click="downloadSong(row)">
-                  <BsCloudDownload />
+                <el-icon class="control-icon" @click="download(row)">
+                  <BsCloudDownload/>
                 </el-icon>
               </template>
               <template v-else>
@@ -118,9 +118,9 @@
         </el-table>
 
         <el-empty
-          v-if="!songsList.length && !tableLoading"
-          :image-size="200"
-          description="暂无数据"
+            v-if="!songsList.length && !tableLoading"
+            :image-size="200"
+            description="暂无数据"
         />
       </el-scrollbar>
     </div>
@@ -128,14 +128,14 @@
 </template>
 
 <script setup>
-import { onMounted, reactive, ref } from "vue";
-import { useStore } from "vuex";
-import { BiHeart, BiSolidHeart } from "vue-icons-plus/bi";
-import { BsCloudDownload } from "vue-icons-plus/bs";
-import { message } from "../utils/message.js";
-import { useRoute } from "vue-router";
-import { getAllSongs, getArtistDetail } from "../api/manage.js";
-import { formatDate } from "@vueuse/core";
+import {onMounted, reactive, ref} from "vue";
+import {useStore} from "vuex";
+import {BiHeart, BiSolidHeart} from "vue-icons-plus/bi";
+import {BsCloudDownload} from "vue-icons-plus/bs";
+import {useRoute} from "vue-router";
+import {getAllSongs, getArtistDetail} from "../api/manage.js";
+import {formatDate} from "@vueuse/core";
+import {download, playSongs} from "../utils/Song.js";
 
 const isShowTooltip = ref(false);
 const routes = useRoute();
@@ -198,26 +198,6 @@ const visibilityChange = (event) => {
   isShowTooltip.value = evWeight <= contentWeight;
 };
 
-// 下载歌曲
-const downloadSong = async (row) => {
-  message("正在创建下载链接....", "info");
-  try {
-    const response = await fetch(row.audioUrl);
-    const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
-    const link = document.createElement("a");
-    link.href = url;
-    link.download = `${row.name}.mp3`; // 自定义文件名
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    window.URL.revokeObjectURL(url);
-    message("链接创建成功，正在调用浏览器下载窗口...", "success");
-  } catch (error) {
-    message("下载失败", "error");
-  }
-};
-
 // 获取歌手详情
 const fetchArtistDetail = async () => {
   if (!store.state.SELECTED_ARTIST) {
@@ -234,8 +214,8 @@ const fetchArtistDetail = async () => {
     artistData.birth = "暂无数据";
   } else {
     artistData.birth = formatDate(
-      new Date(store.state.SELECTED_ARTIST.birth),
-      "YYYY年MM月DD日",
+        new Date(store.state.SELECTED_ARTIST.birth),
+        "YYYY年MM月DD日",
     );
   }
 };
@@ -250,20 +230,14 @@ const fetchArtistSongs = async () => {
     songsList.value = res.data.data.records;
     songsList.value.forEach((song) => {
       song.duration =
-        Math.floor(song.duration / 60) +
-        ":" +
-        (Math.floor(song.duration % 60) < 10
-          ? "0" + Math.floor(song.duration % 60)
-          : Math.floor(song.duration % 60));
+          Math.floor(song.duration / 60) +
+          ":" +
+          (Math.floor(song.duration % 60) < 10
+              ? "0" + Math.floor(song.duration % 60)
+              : Math.floor(song.duration % 60));
     });
   }
   tableLoading.value = false;
-};
-
-const playSong = (row) => {
-  store.commit("SET_CURRENT_SONG", row);
-  store.commit("ADD_SONG_TO_TRACK_LIST", row);
-  store.commit("SET_PLAYING", true);
 };
 
 onMounted(() => {

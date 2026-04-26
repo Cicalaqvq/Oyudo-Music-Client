@@ -252,6 +252,7 @@ import {message} from "../../utils/message.js";
 import SongDetail from "./SongDetail.vue";
 import {fetchFavoriteSongs, toggleFavoriteSong,} from "../../utils/userFavorite.js";
 import {fetchSongComments} from "../../utils/userComment.js";
+import {handle25Percent, handle75Percent} from "../../utils/Song.js";
 
 const store = useStore();
 const popoverVisible = ref(false);
@@ -273,6 +274,7 @@ const comments = ref([]);
 const localVolume = computed(() => store.state.VOLUME);
 let lastVolume = localVolume.value;
 const audioRef = ref(null);
+const hasUserInteracted = ref(false);
 
 const mute = () => {
   lastVolume = localVolume.value;
@@ -360,6 +362,7 @@ const togglePlay = () => {
     store.commit("SET_PLAYING", false);
     return;
   }
+  hasUserInteracted.value = true;
   if (audioRef.value) {
     if (localIsPlaying.value) {
       audioRef.value.pause();
@@ -372,6 +375,7 @@ const togglePlay = () => {
 
 // 上一首
 const previousSong = () => {
+  handleAudioProcess();
   try {
     store.commit("TRACK_LIST_IS_EMPTY");
     store.commit("QUEUE_IS_EMPTY");
@@ -389,6 +393,7 @@ const previousSong = () => {
 
 // 下一首
 const nextSong = () => {
+  handleAudioProcess();
   try {
     store.commit("TRACK_LIST_IS_EMPTY");
   } catch (e) {
@@ -405,15 +410,14 @@ const nextSong = () => {
 // 切换收藏
 const toggleFavorite = async () => {
   isFavorite.value = await toggleFavoriteSong(
-      store,
-      [store.state.CURRENT_SONG.id],
+      [store.state.CURRENT_SONG],
       isFavorite.value,
   );
 };
 
 const fetchFavorite = async () => {
-  const flag = await fetchFavoriteSongs(store, [store.state.CURRENT_SONG.id]);
-  isFavorite.value = flag.length > 0;
+  const songs = await fetchFavoriteSongs([store.state.CURRENT_SONG.id]);
+  isFavorite.value = songs.length > 0;
 };
 
 // 音量改变
@@ -440,6 +444,7 @@ const onEnded = () => {
   try {
     store.commit("TRACK_LIST_IS_EMPTY");
   } catch (e) {
+    handleAudioProcess();
     message(e.message + "，结束播放", "error");
     store.commit("SET_PLAYING", false);
     return;
@@ -453,6 +458,18 @@ const onProgressChange = (value) => {
     audioRef.value.currentTime = value;
   }
 };
+
+const handleAudioProcess = () => {
+  const lastSong = store.state.CURRENT_SONG;
+  if (lastSong && audioRef.value) {
+    const audioProgress = audioRef.value.currentTime / audioRef.value.duration;
+    if (audioProgress >= 0.75) {
+      handle75Percent(lastSong.id);
+    } else if (audioProgress < 0.25 && audioProgress > 0.1) {
+      handle25Percent(lastSong.id);
+    }
+  }
+}
 
 // 格式化时间
 const formatTime = (time) => {
@@ -472,17 +489,22 @@ watchEffect(() => {
       return;
     }
     nextTick(() => {
+      if (!hasUserInteracted.value) {
+        store.commit("SET_PLAYING", false);
+        message("请点击播放按钮开始播放", "warning");
+        return;
+      }
       const playPromise = audioRef.value.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
           audioRef.value.volume = volume / 100;
         });
         playPromise.catch((error) => {
-          // 忽略 AbortError
           if (error.name === "NotAllowedError") {
-            message("上一次播放时意外退出，请手动播放", "warning");
+            store.commit("SET_PLAYING", false);
+            hasUserInteracted.value = false;
+            message("请点击播放按钮开始播放", "warning");
           } else if (error.name !== "AbortError") {
-            // 只报告非 AbortError 的错误
             message("音频播放异常，请联系管理员处理", "error");
             console.error("音频播放错误:", error);
           }
@@ -495,6 +517,13 @@ watchEffect(() => {
   }
 });
 
+document.addEventListener('click', () => {
+  hasUserInteracted.value = true;
+}, {once: true});
+
+document.addEventListener('keydown', () => {
+  hasUserInteracted.value = true;
+}, {once: true});
 </script>
 
 <style scoped>

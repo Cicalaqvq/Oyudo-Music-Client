@@ -23,7 +23,11 @@
         <el-input v-model="userForm.username" placeholder="请输入用户名"/>
       </el-form-item>
       <el-form-item label="邮箱" prop="email">
-        <el-input v-model="userForm.email" placeholder="请输入邮箱"/>
+        <el-input v-model="userForm.email" disabled placeholder="请输入邮箱">
+          <template #append>
+            <el-button slot="append" @click="showDialogVisible = true">更改邮箱</el-button>
+          </template>
+        </el-input>
       </el-form-item>
       <el-form-item label="联系电话" prop="phone">
         <el-input v-model="userForm.phone" placeholder="请输入联系电话"/>
@@ -49,22 +53,46 @@
     </template>
     <el-dialog
         v-model="showDialogVisible"
-        title="验证邮箱"
-        width="auto"
+        title="更改邮箱"
+        width="500px"
         @close="closeDialog"
     >
       <el-form
-          ref="authEmailFormRef"
-          :model="authEmailForm"
-          :rules="authEmailFormRules"
+          ref="updateEmailFormRef"
+          :model="updateEmailForm"
+          :rules="updateEmailFormRules"
+          label-position="top"
       >
         <el-form-item label="邮箱" prop="email">
-          <el-input v-model="authEmailForm.email" disabled/>
+          <el-input v-model="updateEmailForm.email"/>
         </el-form-item>
         <el-form-item label="验证码" prop="code">
-          <el-input v-model="authEmailForm.code" placeholder="请输入验证码"/>
+          <el-input
+              v-model="updateEmailForm.code"
+              placeholder="验证码"
+          >
+            <template #append>
+              <el-button v-if="!isSendCode" slot="append" v-loading="sendCodeLoading"
+                         @click="sendCode"
+              >获取验证码
+              </el-button
+              >
+              <el-button v-else slot="append" disabled>
+                <el-countdown
+                    :value="countDownTime"
+                    format="ss"
+                    value-style="color:#606266;font-size: 16px"
+                    @finish="isSendCode = false"
+                />
+              </el-button>
+            </template>
+          </el-input>
         </el-form-item>
       </el-form>
+      <template #footer>
+        <el-button @click="closeDialog">取消</el-button>
+        <el-button type="primary" @click="commitAuthEmail">确定</el-button>
+      </template>
     </el-dialog>
     <img-cropper ref="imgCropperRef" @crop-complete="cropComplete"/>
   </el-card>
@@ -72,11 +100,13 @@
 <script setup>
 import {nextTick, onMounted, reactive, ref} from "vue";
 import {useStore} from "vuex";
-import {message, messageBox} from "../utils/message.js";
+import {messageBox} from "../utils/message.js";
 import ImgCropper from "../layout/components/ImgCropper.vue";
 
 const imgCropperRef = ref(null);
-
+const isSendCode = ref(false);
+const sendCodeLoading = ref(false);
+const countDownTime = ref(Date.now() + 2 * 60 * 1000);
 const store = useStore();
 const userForm = reactive({
   userAvatar: null,
@@ -85,17 +115,17 @@ const userForm = reactive({
   phone: "",
   introduction: "",
 });
-const authEmailForm = reactive({
+const updateEmailForm = reactive({
   email: userForm.email,
   code: null,
 });
 const userFormRef = ref(null);
-const authEmailFormRef = ref(null);
+const updateEmailFormRef = ref(null);
 const showDialogVisible = ref(false);
 const userFormRules = {
   username: [
     {required: true, message: "请输入用户名", trigger: "blur"},
-    {min: 3, max: 10, message: "长度在 3 到 10 个字符", trigger: "blur"},
+    {min: 3, max: 15, message: "长度在 3 到 15 个字符", trigger: "blur"},
   ],
   email: [
     {required: true, message: "请输入邮箱", trigger: "blur"},
@@ -116,9 +146,17 @@ const userFormRules = {
     {max: 100, message: "长度不能超过 100 个字符", trigger: "blur"},
   ],
 };
-const authEmailFormRules = {
+const updateEmailFormRules = {
   email: [
     {required: true, message: "请输入邮箱", trigger: "blur"},
+    {validator: (rule, value, callback) => {
+        if (value === userForm.email) {
+          callback(new Error("邮箱不能与当前邮箱一致"));
+        } else {
+          callback();
+        }
+      },
+    },
     {
       type: "email",
       message: "请输入正确的邮箱地址",
@@ -127,22 +165,39 @@ const authEmailFormRules = {
   ],
   code: [{required: true, message: "请输入验证码", trigger: "change"}],
 };
+
 const commit = async () => {
   const valid = await userFormRef.value?.validate().catch(() => false);
   if (!valid) {
     return false;
   }
-  if (store.state.USER_INFO.email !== userForm.email) {
-    messageBox("新的邮箱需要验证，是否继续？", "检测到您修改了邮箱", "warning")
-        .then(() => {
-          showDialogVisible.value = true;
-        })
-        .catch(() => {
-          userForm.email = store.state.USER_INFO.email;
-          message("邮箱信息已恢复", "info");
-        });
-  } else {
-    await store.dispatch("updateUserInfo", userForm);
+  await store.dispatch("updateUserInfo", userForm);
+};
+
+const sendCode = () => {
+  sendCodeLoading.value = true;
+  updateEmailFormRef.value.validateField("email").then(async () => {
+    await store.dispatch("userGetCode", updateEmailForm.email);
+    isSendCode.value = true;
+    countDownTime.value = Date.now() + 2 * 60 * 1000;
+  }).catch((err) => {
+    isSendCode.value = true;
+    countDownTime.value = err.message;
+  }).finally(() => {
+    sendCodeLoading.value = false;
+  });
+};
+
+const commitAuthEmail = async () => {
+  const valid = await updateEmailFormRef.value?.validate().catch(() => false);
+  if (!valid) {
+    return false;
+  }
+  const res = await store.dispatch("updateEmail", updateEmailForm);
+  if(res)
+  {
+    showDialogVisible.value = false;
+    initData();
   }
 };
 
@@ -155,12 +210,8 @@ const cropComplete = (data) => {
 };
 
 const closeDialog = () => {
-  messageBox("邮箱尚未验证，是否退出？", "退出验证确认", "warning").then(() => {
-    showDialogVisible.value = false;
-    userForm.email = store.state.USER_INFO.email;
-    message("邮箱信息已恢复", "info");
-  }).catch(() => {
-  });
+  showDialogVisible.value = false;
+  updateEmailForm.email = userForm.email;
 };
 
 const reset = async () => {
@@ -174,7 +225,7 @@ const initData = () => {
       return;
     }
     Object.assign(userForm, store.state.USER_INFO);
-    authEmailForm.email = store.state.USER_INFO.email;
+    updateEmailForm.email = store.state.USER_INFO.email;
   });
 };
 

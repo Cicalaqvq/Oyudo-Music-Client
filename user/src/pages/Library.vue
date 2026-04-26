@@ -16,7 +16,7 @@
           element-loading-text="Loading..."
           height="670"
           style="width: 100%; font-size: 12px"
-          @row-dblclick="playSong"
+          @row-dblclick="(row) => playSongs([row])"
       >
         >
         <el-table-column
@@ -93,6 +93,7 @@ import {BsCloudDownload} from "vue-icons-plus/bs";
 import {message} from "../utils/message.js";
 import {fetchFavoriteSongs, toggleFavoriteSong,} from "../utils/userFavorite.js";
 import {useRoute} from "vue-router";
+import {playSongs} from "../utils/Song.js";
 
 const store = useStore();
 
@@ -150,7 +151,7 @@ const page = reactive({
 });
 
 const toggleFavorite = async (row) => {
-  row.isLiked = await toggleFavoriteSong(store, [row.id], row.isLiked);
+  row.isLiked = await toggleFavoriteSong([row], row.isLiked);
 };
 
 const handleDownload = async (row) => {
@@ -172,11 +173,6 @@ const handleDownload = async (row) => {
   }
 };
 
-const playSong = (row) => {
-  store.commit("SET_CURRENT_SONG", row);
-  store.commit("ADD_SONG_TO_TRACK_LIST", row);
-  store.commit("SET_PLAYING", true);
-};
 
 const fetchSongs = async () => {
   tableLoading.value = true;
@@ -203,7 +199,7 @@ const fetchSongs = async () => {
 };
 
 const fetchFavorite = async () => {
-  const favoriteSongs = await fetchFavoriteSongs(store);
+  const favoriteSongs = await fetchFavoriteSongs();
   if (favoriteSongs) {
     songs.value.forEach((song) => {
       song.isLiked =

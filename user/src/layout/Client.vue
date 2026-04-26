@@ -65,7 +65,7 @@ const isCollapse = ref(false);
   left: 0;
   bottom: 0;
   padding: 0;
-  z-index: 1000;
+  z-index: 9999;
 }
 
 .el-aside {

@@ -4,13 +4,6 @@ export function getBanners() {
     return request.get("/user/getBanners");
 }
 
-export function getRecommendPlaylists() {
-    return request.get("/user/getRecommendPlaylists");
-}
-
-export function getRecommendSongs() {
-    return request.get("/user/getRecommendSongs");
-}
 
 export function getCommentOfSong(songId) {
     return request.get("/user/getCommentOfSong", {
@@ -78,6 +71,7 @@ export function login(loginForm) {
 export function register(registerForm) {
     return request.post("/user/register", registerForm);
 }
+
 export function logout() {
     return request.post("/user/logout");
 }
@@ -157,10 +151,39 @@ export function likeComment(commentId) {
 }
 
 export function uploadImg(formData) {
-    return request.post("/common/uploadImg", formData, {
+    return request.post("/common/file/uploadImg", formData, {
             headers: {
                 "Content-Type": "multipart/form-data"
             }
         }
     );
+}
+
+export function updateEmail(emailForm){
+    return request.put("/user/updateEmail", emailForm);
+}
+
+// 推荐算法
+export function addScoreToSong(songId, score) {
+    return request.post(`/common/recommend/addScoreToSong`, {score: score, songId: songId})
+}
+
+export function addScoreToPlaylist(playlistId, score) {
+    return request.post(`/common/recommend/addScoreToPlaylist`, {playlistId: playlistId, score: score});
+}
+
+export function getRecommendPlaylists() {
+    return request.get("/common/recommend/getRecommendPlaylists");
+}
+
+export function getRecommendSongs() {
+    return request.get("/common/recommend/getRecommendSongs");
+}
+
+export function refreshRecommendSongs(){
+    return request.get("/common/recommend/refreshRecommendSongs");
+}
+
+export function refreshRecommendPlaylists(){
+    return request.get("/common/recommend/refreshRecommendPlaylists");
 }

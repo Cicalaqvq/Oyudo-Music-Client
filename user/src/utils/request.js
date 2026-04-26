@@ -31,26 +31,31 @@ request.interceptors.response.use(
     function (response) {
         // 2xx 范围内的状态码都会触发该函数。
         const code = response.data.code;
-
         if (code !== 200) {
             if (code === 401) {
                 message("登录已过期", "warning");
                 removeCookies();
                 removeLoginState(store);
-            } else if (code === 500) {
-                message(response.data.msg || "请求失败", "error");
             } else if (code === 404) {
                 message("未找到后端请求地址，请检查后端服务器", "error");
-            } else {
-                notification("错误", response.data.msg || "请求失败", "error");
-                Promise.reject(response.data.msg);
+            } else if (code === 500) {
+                message(response.data.msg, "error");
             }
+            Promise.reject(response.data.msg);
         }
-        // 对响应数据做点什么
         return response;
     },
     function (error) {
-        notification("错误", error.message, "error");
+        const code = error.response.status;
+        let msg;
+        if (code === 500) {
+            msg = "请检查后端服务器";
+        } else if (code === 404) {
+            msg = "未找到后端请求地址";
+        } else {
+            msg = error.response.statusText;
+        }
+        notification(`错误代码：${code}`, `${msg}`, "error")
         return Promise.reject(error);
     },
 );

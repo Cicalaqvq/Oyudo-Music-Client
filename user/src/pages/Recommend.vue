@@ -3,23 +3,26 @@
     <!-- 轮播图区域 -->
     <div class="banner-section">
       <el-carousel
-        v-if="banners.length"
-        :interval="4000"
-        arrow="always"
-        autoplay
-        height="auto"
-        type="card"
+          v-if="banners.length"
+          v-loading="bannerLoading"
+          :interval="4000"
+          arrow="always"
+          autoplay
+          element-loading-text="Loading..."
+          height="auto"
+          type="card"
       >
         <el-carousel-item
-          v-for="banner in banners"
-          :key="banner.id"
-          style="height: 275px"
+            v-for="banner in banners"
+            :key="banner.id"
+            style="height: 275px"
         >
           <div class="banner-item">
-            <el-image :src="banner.bannerUrl" class="banner-image" lazy />
+            <el-image :src="banner.bannerUrl" class="banner-image" lazy/>
           </div>
         </el-carousel-item>
       </el-carousel>
+      <el-empty v-else description="暂无数据"/>
     </div>
 
     <!-- 歌单推荐 -->
@@ -28,27 +31,28 @@
         <h2 class="section-title">今日为你推荐</h2>
         <div class="section-more" @click="viewMore">
           <el-icon>
-            <Share />
+            <Share/>
           </el-icon>
           <span>更多</span>
         </div>
       </div>
-      <div class="playlist-grid">
+      <div v-if="playlists.length" v-loading="playlistsLoading" class="playlist-grid" element-loading-text="Loading...">
         <div
-          v-for="playlist in playlists"
-          :key="playlist.id"
-          class="playlist-item"
-          @click="showPlaylistDetail(playlist)"
+            v-for="playlist in playlists"
+            :key="playlist.id"
+            class="playlist-item"
+            @click="showPlaylistDetail(playlist)"
         >
           <div class="playlist-cover">
-            <el-image :src="playlist.coverUrl" alt="封面" />
-            <div class="play-btn" />
+            <el-image :src="playlist.coverUrl" alt="封面"/>
+            <div class="play-btn"/>
           </div>
           <div class="playlist-info">
             <div class="like-name">{{ playlist.title }}</div>
           </div>
         </div>
       </div>
+      <el-empty v-else description="暂无数据"/>
     </div>
 
     <!-- 歌曲推荐 -->
@@ -57,25 +61,25 @@
         <h2 class="section-title">相似推荐</h2>
         <div class="section-more" @click="refreshRecommend">
           <el-icon>
-            <Refresh />
+            <Refresh/>
           </el-icon>
           <span>刷新</span>
         </div>
       </div>
-      <div class="song-list">
+      <div v-if="songs.length" v-loading="songsLoading" class="song-list" element-loading-text="Loading...">
         <div class="songs-column">
           <div
-            v-for="song in songsLeft"
-            :key="song.id"
-            class="song-item"
-            @click="playSong(song)"
+              v-for="song in songsLeft"
+              :key="song.id"
+              class="song-item"
+              @click="playSongs([song])"
           >
             <div class="song-left">
               <el-image
-                :alt="song.name"
-                :src="song.coverUrl"
-                class="song-cover"
-                lazy
+                  :alt="song.name"
+                  :src="song.coverUrl"
+                  class="song-cover"
+                  lazy
               />
               <div class="song-info">
                 <div class="song-title">{{ song.name }}</div>
@@ -87,17 +91,17 @@
         </div>
         <div class="songs-column">
           <div
-            v-for="song in songsRight"
-            :key="song.id"
-            class="song-item"
-            @click="playSong(song)"
+              v-for="song in songsRight"
+              :key="song.id"
+              class="song-item"
+              @click="playSongs([song])"
           >
             <div class="song-left">
               <el-image
-                :alt="song.name"
-                :src="song.coverUrl"
-                class="song-cover"
-                lazy
+                  :alt="song.name"
+                  :src="song.coverUrl"
+                  class="song-cover"
+                  lazy
               />
               <div class="song-info">
                 <div class="song-title">{{ song.name }}</div>
@@ -108,23 +112,30 @@
           </div>
         </div>
       </div>
+      <el-empty v-else description="暂无数据"/>
     </div>
   </div>
 </template>
 
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { Refresh, Share } from "@element-plus/icons-vue";
+import {computed, onMounted, ref} from "vue";
+import {Refresh, Share} from "@element-plus/icons-vue";
 import {
   getBanners,
   getRecommendPlaylists,
   getRecommendSongs,
+  refreshRecommendPlaylists,
+  refreshRecommendSongs,
 } from "../api/manage.js";
-import { useStore } from "vuex";
-import { useRouter } from "vue-router";
+import {useStore} from "vuex";
+import {useRouter} from "vue-router";
+import {playSongs} from "../utils/Song.js";
 
 const store = useStore();
 const router = useRouter();
+const bannerLoading = ref(true)
+const playlistsLoading = ref(true);
+const songsLoading = ref(true);
 
 // 轮播图数据
 const banners = ref([]);
@@ -136,47 +147,64 @@ const playlists = ref([]);
 const songs = ref([]);
 
 // 计算属性：将歌曲分为左右两列
-const songsLeft = computed(() => songs.value.slice(0, 10));
-const songsRight = computed(() => songs.value.slice(10, 20));
+const songsLeft = computed(() => songs.value.slice(0, 5));
+const songsRight = computed(() => songs.value.slice(5, 10));
 
 // 查看更多
-const viewMore = () => {
-  fetchRecommendPlaylists();
+const viewMore = async () => {
+  playlistsLoading.value = true;
+  const res = await refreshRecommendPlaylists();
+  if (res.data.code === 200) {
+    playlists.value = res.data.data;
+  }
+  playlistsLoading.value = false;
 };
 
 // 刷新推荐
-const refreshRecommend = () => {
-  fetchRecommendSongs();
+const refreshRecommend = async () => {
+  songsLoading.value = true;
+  const res = await refreshRecommendSongs();
+  if (res.data.code === 200) {
+    songs.value = res.data.data;
+    songs.value.forEach((song) => {
+      const minutes = Math.floor(song.duration / 60);
+      const seconds = Math.floor(song.duration % 60);
+      song.duration =
+          minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+    });
+  }
+  songsLoading.value = false;
 };
 
 // 播放歌单
 const showPlaylistDetail = (playlist) => {
   store.commit("SET_SELECTED_PLAYLIST", playlist);
-  router.push({ path: "/playlist/" + playlist.id });
+  router.push({path: "/playlist/" + playlist.id});
 };
 
-// 播放歌曲
-const playSong = (song) => {
-  store.commit("SET_CURRENT_SONG", song);
-  store.commit("ADD_SONG_TO_USER_PLAYLIST", song);
-  store.commit("SET_PLAYING", true);
-};
 
 const fetchBanners = async () => {
+  bannerLoading.value = true;
   await getBanners().then((res) => {
     if (res.data.code === 200) {
       banners.value = res.data.data.records;
     }
+  }).finally(() => {
+    bannerLoading.value = false;
   });
 };
 const fetchRecommendPlaylists = async () => {
+  playlistsLoading.value = true;
   await getRecommendPlaylists().then((res) => {
     if (res.data.code === 200) {
       playlists.value = res.data.data;
     }
+  }).finally(() => {
+    playlistsLoading.value = false;
   });
 };
 const fetchRecommendSongs = async () => {
+  songsLoading.value = true;
   await getRecommendSongs().then((res) => {
     if (res.data.code === 200) {
       songs.value = res.data.data;
@@ -184,9 +212,11 @@ const fetchRecommendSongs = async () => {
         const minutes = Math.floor(song.duration / 60);
         const seconds = Math.floor(song.duration % 60);
         song.duration =
-          minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
+            minutes + ":" + (seconds < 10 ? "0" + seconds : seconds);
       });
     }
+  }).finally(() => {
+    songsLoading.value = false;
   });
 };
 

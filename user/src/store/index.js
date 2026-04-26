@@ -7,7 +7,7 @@ import {
     login,
     logout,
     register,
-    resetPwd,
+    resetPwd, updateEmail,
     updateUserInfo,
 } from "../api/manage.js";
 import {message} from "../utils/message.js";
@@ -152,8 +152,8 @@ const store = createStore({
             await getCode(email).then((res) => {
                 if (res.data.code === 200) {
                     message("验证码已发送");
-                } else {
-                    throw new Error("获取验证码失败");
+                } else if (res.data.code === 500) {
+                    throw new Error(res.data.data);
                 }
             });
         },
@@ -214,6 +214,14 @@ const store = createStore({
             if (res.data.code === 200) {
                 commit("SET_USER_INFO", res.data.data);
                 message("更新成功");
+            }
+        },
+        async updateEmail({commit}, emailForm){
+            const res = await updateEmail(emailForm);
+            if (res.data.code === 200) {
+                commit("SET_USER_INFO", res.data.data);
+                message("更新成功");
+                return true;
             }
         },
     },

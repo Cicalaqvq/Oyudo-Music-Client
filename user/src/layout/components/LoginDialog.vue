@@ -424,18 +424,14 @@ const sendCode = () => {
       return;
   }
 
-  if (!formRef || !formRef.value) {
-    console.warn('表单引用未就绪');
-    return;
-  }
   sendCodeLoading.value = true;
-  console.log(formRef.value)
   formRef.value.validateField("email").then(async () => {
-    const res = await store.dispatch("userGetCode", form.email);
-    if (res) {
+    await store.dispatch("userGetCode", form.email);
       isSendCode.value = true;
       countDownTime.value = Date.now() + 2 * 60 * 1000;
-    }
+  }).catch((err) => {
+    isSendCode.value = true;
+    countDownTime.value = err.message;
   }).finally(() => {
     sendCodeLoading.value = false;
   });
