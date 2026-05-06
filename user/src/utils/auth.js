@@ -1,29 +1,13 @@
-import {useCookies} from "@vueuse/integrations/useCookies";
+import store from "../store/index.js";
 
-const cookie = useCookies();
+export function checkLogin() {
+    return store.state.USER_TOKEN && store.state.IS_LOGIN && store.state.USER_INFO;
 
-const tokenKey = "token";
-
-export function setCookies(value) {
-    return cookie.set(tokenKey, value);
 }
 
-export function getCookies() {
-    return cookie.get(tokenKey);
-}
-
-export function removeCookies() {
-    return cookie.remove(tokenKey);
-}
-
-export function checkLogin(store) {
-    if (!store.state.USER_INFO) {
-        return false;
-    }
-    return true;
-}
-
-export function removeLoginState(store) {
+export function removeLoginState() {
+    store.commit("SET_USER_TOKEN", null);
     store.commit("SET_USER_INFO", null);
     store.commit("SET_IS_LOGIN", false);
+    store.commit("SET_USER_FAVORITE_PLAYLISTS", []);
 }

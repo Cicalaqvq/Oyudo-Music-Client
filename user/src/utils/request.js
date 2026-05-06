@@ -1,7 +1,8 @@
 import axios from "axios";
-import {message, notification} from "./message.js";
-import {getCookies, removeCookies, removeLoginState} from "./auth.js";
 import store from "../store/index.js";
+import router from "../router/index.js";
+import {message, notification} from "./message.js";
+import {removeLoginState} from "./auth.js";
 
 const request = axios.create({
     baseURL: "/api", // 配置baseURL
@@ -14,10 +15,11 @@ const request = axios.create({
 request.interceptors.request.use(
     function (config) {
         // 在发送请求之前做些什么
-        const token = getCookies();
-        if (token) {
-            config.headers["token"] = token;
+        const token = store.state.USER_TOKEN;
+        if (!token) {
+            config.headers["token-user"] = token;
         }
+
         return config;
     },
     function (error) {
@@ -33,19 +35,19 @@ request.interceptors.response.use(
         const code = response.data.code;
         if (code !== 200) {
             if (code === 401) {
-                message("登录已过期", "warning");
-                removeCookies();
-                removeLoginState(store);
+                message("未登录或登录已过期", "warning");
+                removeLoginState();
+                router.push("/");
             } else if (code === 404) {
                 message("未找到后端请求地址，请检查后端服务器", "error");
             } else if (code === 500) {
                 message(response.data.msg, "error");
             }
-            Promise.reject(response.data.msg);
         }
         return response;
     },
     function (error) {
+        console.error(error);
         const code = error.response.status;
         let msg;
         if (code === 500) {

@@ -14,7 +14,7 @@
           :row-class-name="rowClassName"
           :tooltip-options="{ placement: 'top', offset: '-20' }"
           element-loading-text="Loading..."
-          height="670"
+          height="700"
           style="width: 100%; font-size: 12px"
           @row-dblclick="(row) => playSongs([row])"
       >
@@ -93,7 +93,7 @@ import {BsCloudDownload} from "vue-icons-plus/bs";
 import {message} from "../utils/message.js";
 import {fetchFavoriteSongs, toggleFavoriteSong,} from "../utils/userFavorite.js";
 import {useRoute} from "vue-router";
-import {playSongs} from "../utils/Song.js";
+import {playSongs} from "../utils/userSong.js";
 
 const store = useStore();
 

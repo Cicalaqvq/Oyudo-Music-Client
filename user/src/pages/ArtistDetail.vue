@@ -100,8 +100,8 @@
               </template>
 
               <template v-else-if="column.prop === 'like'">
-                <el-icon class="control-icon">
-                  <BiSolidHeart v-if="row.isLike" style="color: red"/>
+                <el-icon class="control-icon" @click="toggleFavorite(row)">
+                  <BiSolidHeart v-if="row.isLiked || false" style="color: red"/>
                   <BiHeart v-else/>
                 </el-icon>
               </template>
@@ -135,7 +135,8 @@ import {BsCloudDownload} from "vue-icons-plus/bs";
 import {useRoute} from "vue-router";
 import {getAllSongs, getArtistDetail} from "../api/manage.js";
 import {formatDate} from "@vueuse/core";
-import {download, playSongs} from "../utils/Song.js";
+import {download, playSongs} from "../utils/userSong.js";
+import {fetchFavoriteSongs, toggleFavoriteSong} from "../utils/userFavorite.js";
 
 const isShowTooltip = ref(false);
 const routes = useRoute();
@@ -236,8 +237,24 @@ const fetchArtistSongs = async () => {
               ? "0" + Math.floor(song.duration % 60)
               : Math.floor(song.duration % 60));
     });
+    await fetchFavorite();
   }
   tableLoading.value = false;
+};
+
+const fetchFavorite = async () => {
+  const favoriteSongs = await fetchFavoriteSongs();
+  if (favoriteSongs) {
+    songsList.value.forEach((song) => {
+      song.isLiked =
+          favoriteSongs.find((favoriteSong) => favoriteSong.id === song.id) ||
+          false;
+    });
+  }
+};
+
+const toggleFavorite = async (row) => {
+  row.isLiked = await toggleFavoriteSong([row], row.isLiked);
 };
 
 onMounted(() => {

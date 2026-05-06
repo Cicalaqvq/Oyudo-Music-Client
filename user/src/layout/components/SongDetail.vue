@@ -237,7 +237,6 @@ const formRef = ref(null);
 
 const rules = {
   content: [
-    {required: true, message: "请输入评论内容", trigger: "change"},
     {
       min: 1,
       max: 180,
@@ -308,7 +307,7 @@ const nextSong = () => {
 };
 
 const submitComment = async () => {
-  const res = await publishComment(store, commentForm);
+  const res = await publishComment(commentForm);
   if (res) {
     commentForm.content = "";
     fetchComments();
@@ -316,7 +315,7 @@ const submitComment = async () => {
 };
 
 const likeComment = async (id) => {
-  const res = await toggleFavoriteComment(store, id);
+  const res = await toggleFavoriteComment( id);
   if (res) fetchComments();
 };
 

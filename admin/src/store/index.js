@@ -1,6 +1,5 @@
 import {createStore} from 'vuex'
-import {getInfo, getUserList, login} from "../api/manage.js";
-import {removeCookies, setCookies} from "../utils/auth.js";
+import {getInfo, login, logout} from "../api/manage.js";
 import {notification} from "../utils/message.js";
 import createPersistedState from 'vuex-persistedstate';
 
@@ -8,60 +7,62 @@ import createPersistedState from 'vuex-persistedstate';
 const store = createStore({
     state() {
         return {
-            adminInfo: {},
-
+            IS_LOGIN: false,
+            ADMIN_INFO: {},
+            ADMIN_TOKEN: null
         }
     },
     mutations: {
-        setAdminInfo(state, adminInfo) {
-            state.adminInfo = adminInfo
+        SET_ADMIN_INFO(state, adminInfo) {
+            state.ADMIN_INFO = adminInfo
+        },
+        SET_IS_LOGIN(state, isLogin) {
+            state.IS_LOGIN = isLogin
+        },
+        SET_ADMIN_TOKEN(state, token) {
+            state.ADMIN_TOKEN = token
         },
 
     },
     actions: {
-        login(state, formData) {
-            return new Promise((resolve, reject) => {
-                login(formData.username, formData.password).then(res => {
-                    if(res.data.code === 200)
-                    {
-                        setCookies(res.data.data)
-                        store.dispatch("getAdminInfo")
-                        notification("登录成功", "欢迎回来！", "success")
-                        resolve(res.data)
-                    }
-                }).catch(err => {
-                    reject(err)
-                })
-            })
+        async adminLogin({commit}, formData) {
+            const res = await login(formData.username, formData.password);
+            if (res.data.code === 200) {
+                notification("登录成功", "欢迎回来！", "success")
+                commit("SET_ADMIN_TOKEN", res.data.data);
+                commit("SET_IS_LOGIN", true);
+            }
         },
-        getAdminInfo(state) {
-            return new Promise((resolve, reject) => {
-                getInfo().then(res => {
-                    store.commit('setAdminInfo', res.data.data)
-                    resolve(res.data)
-                }).catch(err => {
-                    removeCookies()
-                    reject(err)
-                })
-            })
+        async getAdminInfo({commit}) {
+            const res = await getInfo();
+            if (res.data.code === 200) {
+                commit('SET_ADMIN_INFO', res.data.data);
+            }
+        },
+        async adminLogout({commit}) {
+            const res = await logout();
+            if (res.data.code === 200) {
+                commit('SET_IS_LOGIN', false);
+                commit('SET_ADMIN_INFO', null);
+                commit('SET_ADMIN_TOKEN', null);
+
+            }
         },
     },
     plugins: [
         createPersistedState({
             // 自定义存储方式
-            storage: window.sessionStorage,
+            storage: window.localStorage,
             // 指定需要持久化的状态
             reducer(state) {
                 return {
-                    adminInfo: state.adminInfo,
+                    ADMIN_INFO: state.ADMIN_INFO,
+                    IS_LOGIN: state.IS_LOGIN,
+                    ADMIN_TOKEN: state.ADMIN_TOKEN
                 }
             },
             // 自定义存储的key
-            key: 'oyudo-music-state',
-            // 只在特定mutation后持久化
-            filter(mutation) {
-                return ['setAdminInfo'].includes(mutation.type)
-            },
+            key: 'AdminStore',
         })
     ]
 })

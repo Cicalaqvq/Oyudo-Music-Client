@@ -32,6 +32,7 @@
                   :prefix-icon="Lock"
                   placeholder="验证码"
                   style="max-width: 400px"
+                  @keydown.enter="userLogin"
               >
                 <template #append>
                   <el-button v-if="!isSendCode" slot="append" @click="sendCode"
@@ -56,6 +57,7 @@
                   placeholder="密码"
                   show-password
                   type="password"
+                  @keydown.enter="userLogin"
               />
             </el-form-item>
             <div style="padding-bottom: 10px;display: flex; justify-content: space-between">
@@ -365,10 +367,10 @@ const userLogin = () => {
       .validate()
       .then(async () => {
         await store.dispatch("userLogin", loginForm);
-        loginFormRef.value.resetFields();
-        store.commit("SET_SHOW_LOGIN_DIALOG", false);
         await store.dispatch("getUserInfo");
         await store.dispatch("getUserFavoritePlaylists");
+        loginFormRef.value.resetFields();
+        store.commit("SET_SHOW_LOGIN_DIALOG", false);
       })
       .finally(() => {
         loading.value = false;
@@ -427,8 +429,8 @@ const sendCode = () => {
   sendCodeLoading.value = true;
   formRef.value.validateField("email").then(async () => {
     await store.dispatch("userGetCode", form.email);
-      isSendCode.value = true;
-      countDownTime.value = Date.now() + 2 * 60 * 1000;
+    isSendCode.value = true;
+    countDownTime.value = Date.now() + 2 * 60 * 1000;
   }).catch((err) => {
     isSendCode.value = true;
     countDownTime.value = err.message;
@@ -436,7 +438,6 @@ const sendCode = () => {
     sendCodeLoading.value = false;
   });
 };
-
 
 const handleTabChange = () => {
   isSendCode.value = false;

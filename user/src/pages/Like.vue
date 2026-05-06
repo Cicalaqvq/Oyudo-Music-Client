@@ -116,7 +116,7 @@ import {BiSolidHeart} from "vue-icons-plus/bi";
 import {BsCloudDownload} from "vue-icons-plus/bs";
 import {message, messageBox} from "../utils/message.js";
 import {unlikeSong} from "../api/manage.js";
-import {download, playSongs} from "../utils/Song.js";
+import {download, playSongs} from "../utils/userSong.js";
 import {fetchFavoriteSongs} from "../utils/userFavorite.js";
 
 const tableLoading = ref(false);

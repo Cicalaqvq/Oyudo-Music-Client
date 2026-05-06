@@ -181,6 +181,7 @@
                 multiple
                 placeholder="请输入歌名以选择歌曲（多选）"
                 placement="bottom"
+                style="width: 300px"
                 popper-style="width:300px;max-height:500px;overflow: auto"
                 @input="handleInput"
             >

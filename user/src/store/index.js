@@ -7,7 +7,8 @@ import {
     login,
     logout,
     register,
-    resetPwd, updateEmail,
+    resetPwd,
+    updateEmail,
     updateUserInfo,
 } from "../api/manage.js";
 import {message} from "../utils/message.js";
@@ -20,12 +21,13 @@ const store = createStore({
 
             // 用户相关UserStore
             USER_INFO: null,
+            USER_TOKEN: null,
             USER_FAVORITE_PLAYLISTS: [],
             IS_LOGIN: false,
 
             // 播放相关AudioStore
             TRACK_LIST: [],
-            PLAYED_QUEUE: [],
+            // PLAYED_QUEUE: [],
             PLAY_MODE: 0, // 0:顺序播放 1:随机播放 2:单曲循环
             CURRENT_SONG: null,
             IS_PLAYING: false,
@@ -78,7 +80,7 @@ const store = createStore({
             const currentSong = state.CURRENT_SONG;
             const index = state.TRACK_LIST.indexOf(currentSong);
             // 3. 保存进已经播放的列表中
-            if (!Array.isArray(state.PLAYED_QUEUE)) {
+            /*if (!Array.isArray(state.PLAYED_QUEUE)) {
                 state.PLAYED_QUEUE = [];
             }
             if (
@@ -86,7 +88,7 @@ const store = createStore({
                 state.PLAYED_QUEUE.length > 0
             ) {
                 state.PLAYED_QUEUE.push(currentSong);
-            }
+            }*/
             // 4. 判断播放方式
             switch (state.PLAY_MODE) {
                 // 4.1 顺序播放
@@ -112,7 +114,24 @@ const store = createStore({
             state.IS_PLAYING = true;
         },
         SET_PREV_SONG(state) {
-            state.CURRENT_SONG = state.PLAYED_QUEUE.pop();
+            const currentSong = state.CURRENT_SONG;
+            const index = state.TRACK_LIST.indexOf(currentSong);
+
+            switch (state.PLAY_MODE) {
+                case 0:
+                    if (index === 0) {
+                        state.CURRENT_SONG = state.TRACK_LIST[state.TRACK_LIST.length - 1];
+                    } else {
+                        state.CURRENT_SONG = state.TRACK_LIST[index - 1];
+                    }
+                    break;
+                case 1:
+                    let randomIndex = Math.floor(Math.random() * state.TRACK_LIST.length);
+                    state.CURRENT_SONG = state.TRACK_LIST[randomIndex];
+                    break;
+                default:
+                    break;
+            }
             state.IS_PLAYING = true;
         },
         SET_PLAYING(state, isPlaying) {
@@ -133,6 +152,9 @@ const store = createStore({
         SET_IS_LOGIN(state, isLogin) {
             state.IS_LOGIN = isLogin;
         },
+        SET_USER_TOKEN(state, token) {
+            state.USER_TOKEN = token;
+        },
         SET_SHOW_LOGIN_DIALOG(state, isShow) {
             state.SHOW_LOGIN_DIALOG = isShow;
         },
@@ -149,17 +171,17 @@ const store = createStore({
 
     actions: {
         async userGetCode({commit}, email) {
-            await getCode(email).then((res) => {
-                if (res.data.code === 200) {
-                    message("验证码已发送");
-                } else if (res.data.code === 500) {
-                    throw new Error(res.data.data);
-                }
-            });
+            const res = await getCode(email);
+            if (res.data.code === 200) {
+                message("验证码已发送，请查收");
+            } else {
+                throw new Error(res.data.data);
+            }
         },
         async userLogin({commit}, loginForm) {
             await login(loginForm).then((res) => {
                 if (res.data.code === 200) {
+                    commit("SET_USER_TOKEN", res.data.data);
                     commit("SET_IS_LOGIN", true);
                     message("登录成功");
                 } else {
@@ -200,6 +222,8 @@ const store = createStore({
             await getPlaylistFavorite(null).then((res) => {
                 if (res.data.code === 200) {
                     commit("SET_USER_FAVORITE_PLAYLISTS", res.data.data.playlists);
+                } else {
+                    throw new Error("获取用户收藏歌单失败");
                 }
             });
         },
@@ -207,23 +231,39 @@ const store = createStore({
             const res = await getUserInfo();
             if (res.data.code === 200) {
                 commit("SET_USER_INFO", res.data.data);
+            } else {
+                throw new Error("获取用户信息失败");
             }
         },
-        async updateUserInfo({commit}, userForm) {
+        async updateUserInfo({commit, dispatch}, userForm) {
             const res = await updateUserInfo(userForm);
             if (res.data.code === 200) {
-                commit("SET_USER_INFO", res.data.data);
                 message("更新成功");
+                dispatch("getUserInfo");
+            } else {
+                throw new Error("更新用户信息失败");
             }
         },
-        async updateEmail({commit}, emailForm){
+        async updateEmail({commit}, emailForm) {
             const res = await updateEmail(emailForm);
             if (res.data.code === 200) {
-                commit("SET_USER_INFO", res.data.data);
                 message("更新成功");
-                return true;
+            } else {
+                throw new Error("更新邮箱失败");
             }
         },
+        async deleteUser({commit}) {
+            const res = await deleteUser();
+            if (res.data.code === 200) {
+                commit("SET_USER_TOKEN", null);
+                commit("SET_USER_INFO", null);
+                commit("SET_IS_LOGIN", false);
+                commit("SET_USER_FAVORITE_PLAYLISTS", []);
+                message("注销成功");
+            } else {
+                throw new Error("注销失败");
+            }
+        }
     },
     plugins: [
         createPersistedState({
@@ -252,6 +292,7 @@ const store = createStore({
                     USER_INFO: state.USER_INFO,
                     USER_FAVORITE_PLAYLISTS: state.USER_FAVORITE_PLAYLISTS,
                     IS_LOGIN: state.IS_LOGIN,
+                    USER_TOKEN: state.USER_TOKEN,
                 };
             },
             // 自定义存储的 key

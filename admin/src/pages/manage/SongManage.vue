@@ -247,7 +247,7 @@
           />
         </el-form-item>
         <el-form-item label="类型" prop="styleIds" required>
-          <el-select-v2
+          <el-select
               v-model="editForm.styleIds"
               :options="styles"
               class="form-inline"
@@ -390,7 +390,6 @@ const fetchSongList = async () => {
       total.value = res.data.data.total;
       songList.value.forEach(item => {
         item.releaseTime = formatDate(new Date(item.releaseTime), "YYYY-MM-DD");
-        // item.artistName = artistList.value.find(artist => artist.id === item.artistId).name;
       });
     }
   } finally {
@@ -467,7 +466,7 @@ const handleEdit = (row) => {
       styleNames.forEach(styleName => {
         const styleItem = getStyleId(styleName);
         if (styleItem) {
-          editForm.styleIds.push(styleItem.value);
+          editForm.styleIds.push(styleItem.valueOf());
         }
       });
     }

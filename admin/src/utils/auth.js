@@ -1,15 +1,7 @@
-import { useCookies } from '@vueuse/integrations/useCookies'
+import store from "../store/index.js";
 
-const cookie = useCookies()
-const tokenKey = 'token'
-export function setCookies(value) {
-    return cookie.set(tokenKey, value)
-}
-
-export function getCookies() {
-    return cookie.get(tokenKey)
-}
-
-export function removeCookies() {
-    return cookie.remove(tokenKey)
+export function removeLoginState() {
+    store.commit("SET_TOKEN", null);
+    store.commit("SET_ADMIN_INFO", null);
+    store.commit("SET_IS_LOGIN", false);
 }

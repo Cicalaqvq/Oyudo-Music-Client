@@ -72,7 +72,7 @@
                 </el-image-viewer>
               </template>
 
-              <template v-else-if="column.prop==='status'">
+              <template v-else-if="column.prop ==='status'">
                 <el-switch v-model="row.status"
                            inline-prompt
                            style="--el-switch-on-color: #13ce66; --el-switch-off-color: #ff4949"
@@ -231,10 +231,15 @@ const fetchBanners = async () => {
   await getBanners(searchForm).then(res => {
     if (res.data.code === 200) {
       banners.value = res.data.data.records;
-      page.total = res.data.data.total;
-      banners.value.forEach(item => {
-        item.status = item.status === 0;
+      banners.value.forEach(banner => {
+        if (banner.status === 1) {
+          banner.status = false;
+        }
+        if (banner.status === 0) {
+          banner.status = true;
+        }
       })
+      page.total = res.data.data.total;
     }
   }).finally(() => {
     tableLoading.value = false;
@@ -243,11 +248,14 @@ const fetchBanners = async () => {
 
 const handleSearch = () => {
   searchForm.pageNum = 1;
+  page.currentPage = 1;
   fetchBanners();
 };
 
 const handleReset = () => {
   searchForm.status = null;
+  searchForm.pageNum = 1;
+  page.currentPage = 1;
   fetchBanners();
 };
 
@@ -263,6 +271,7 @@ const handleDelete = (row) => {
         deleteBanners(ids).then(res => {
           if (res.data.code === 200) {
             message("删除成功")
+            handleReset();
             fetchBanners();
           }
         })
@@ -279,6 +288,7 @@ const handleBatchDelete = () => {
         deleteBanners(ids).then(res => {
           if (res.data.code === 200) {
             message("已删除" + ids.length + "个轮播图");
+            handleReset();
             fetchBanners();
           }
         })
@@ -348,6 +358,8 @@ const onSubmit = () => {
 
 const handleSizeChange = (size) => {
   searchForm.pageSize = size;
+  page.currentPage = 1;
+  searchForm.pageNum = 1;
   fetchBanners();
 };
 

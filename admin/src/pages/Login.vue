@@ -45,6 +45,7 @@
 import {reactive, ref} from 'vue'
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
+
 const store = useStore()
 const router = useRouter()
 
@@ -68,17 +69,17 @@ const rules = {
 }
 
 const onSubmit = () => {
-  formRef.value.validate((valid) => {
-    loading.value = true
+  loading.value = true
+  formRef.value.validate(async (valid) => {
     if (!valid) {
-      return false
+      return false;
     }
     // 登录
-    store.dispatch('login', form).then(res => {
-      router.push('/')
-    })
+    await store.dispatch('adminLogin', form);
+    await store.dispatch('getAdminInfo');
+    await router.push('/');
   }).finally(() => {
-    loading.value = false
+    loading.value = false;
   })
 }
 

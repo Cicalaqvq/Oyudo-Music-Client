@@ -129,7 +129,7 @@ import {
 } from "../api/manage.js";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
-import {playSongs} from "../utils/Song.js";
+import {playSongs} from "../utils/userSong.js";
 
 const store = useStore();
 const router = useRouter();

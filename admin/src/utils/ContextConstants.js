@@ -69,10 +69,6 @@ export const styles = [
     },
 ]
 
-export function getStyleName(styleId) {
-    return styles.find(item => item.value === styleId).label;
-}
-
 export function getStyleId(styleName) {
     return styles.find(item => item.label === styleName).value;
 }

@@ -1,8 +1,8 @@
 import {createRouter, createWebHistory} from "vue-router";
 import {hideFullLoading, showFullLoading} from "../utils/fullLoading.js";
-import {getCookies, removeLoginState} from "../utils/auth.js";
 import {message} from "../utils/message.js";
 import store from "../store/index.js";
+import {menuList} from "../utils/menus.js";
 
 const routes = [
     {
@@ -68,12 +68,20 @@ const routes = [
                 path: "/user",
                 component: () => import("../pages/User.vue"),
                 meta: {
-                    title: "个人中心",
+                    title: "个人信息",
+                },
+            },
+            {
+                path: "/comment",
+                component: () => import("../pages/Comment.vue"),
+                meta: {
+                    title: "评论管理",
                 },
             },
         ],
-    },
-];
+    }
+]
+
 export const router = createRouter({
     history: createWebHistory(),
     routes,
@@ -82,29 +90,23 @@ export const router = createRouter({
 // 设置全局路由守卫
 router.beforeEach(async (to, from, next) => {
     showFullLoading();
-    try {
-        const token = getCookies();
-        if (token && localStorage.getItem("UserStore") === null) {
-            await store.dispatch("userLogout");
-        }
-        if (!token) {
-            removeLoginState(store);
-        }
-        if (to.path === "/like" || to.path === "/user") {
-            if (!token) {
-                message("请先登录", "warning");
-                store.commit("SET_SHOW_LOGIN_DIALOG", true);
-                hideFullLoading();
-                next(false);
-                return;
-            }
-        }
-        document.title = "Oyudo Music" + " - " + (to.meta.title || "无标题");
-        next();
-    } catch (e) {
-        hideFullLoading();
-        next(false);
+    if (store.state.IS_LOGIN) {
+        await store.dispatch("getUserInfo");
     }
+    if (menuList.some(item => item.title === "我的" && item.group.some(item => item.path === to.path))) {
+        if (!store.state.IS_LOGIN) {
+            message("请先登录", "warning");
+            if (from.path === "/") {
+                next("/");
+            } else {
+                store.commit("SET_SHOW_LOGIN_DIALOG", true);
+                next(false);
+            }
+            return;
+        }
+    }
+    document.title = "Oyudo Music" + " - " + (to.meta.title || "无标题");
+    next();
 });
 
 router.afterEach((to, from) => {

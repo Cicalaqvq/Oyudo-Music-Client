@@ -1,19 +1,20 @@
 <template>
-  <el-card :body-style="{'display': 'flex','justify-content': 'space-between','align-items': 'center','padding': '0px'}">
+  <el-card
+      :body-style="{'display': 'flex','justify-content': 'space-between','align-items': 'center','padding': '0px'}">
     <div style="padding-left: 20px"> 当前位置：
       <transition mode="out-in" name="fade">
-      <span :key="$router.currentRoute.value.meta.title">
-            {{ $router.currentRoute.value.meta.title }}
+      <span :key="router.currentRoute.value.meta.title">
+            {{ router.currentRoute.value.meta.title }}
       </span>
       </transition>
     </div>
     <div class="header-right">
-      <el-tooltip class="box-item" content="搜索" effect="dark" placement="bottom">
+      <el-tooltip class="box-item" content="搜索" effect="light" placement="bottom">
         <el-icon class="icon-btn" @click="handleClickSearch">
           <Search/>
         </el-icon>
       </el-tooltip>
-      <el-tooltip :content="!isFullscreen ? '全屏' : '退出全屏'" class="box-item" effect="dark" placement="bottom">
+      <el-tooltip :content="!isFullscreen ? '全屏' : '退出全屏'" class="box-item" effect="light" placement="bottom">
         <el-icon class="icon-btn" @click="toggle">
           <FullScreen v-if="!isFullscreen"/>
           <Aim v-else/>
@@ -21,7 +22,7 @@
       </el-tooltip>
       <el-dropdown class="dropdown" @command="handleCommand">
         <span>
-          {{ $store.state.adminInfo.username }}
+          {{ store.state.ADMIN_INFO.username }}
           <el-icon class="el-icon--right">
             <arrow-down/>
           </el-icon>
@@ -108,10 +109,10 @@ import {useRouter} from "vue-router";
 import {useStore} from "vuex";
 import {useFullscreen} from "@vueuse/core";
 import {messageBox, notification} from "../../utils/message.js";
-import {logout, updatePassword} from "../../api/manage.js";
-import {removeCookies} from "../../utils/auth.js";
+import {updatePassword} from "../../api/manage.js";
 import {reactive, ref} from "vue";
 import {menuList} from "../../utils/menus.js";
+import {removeLoginState} from "../../utils/auth.js";
 
 const {isFullscreen, toggle} = useFullscreen()
 
@@ -147,6 +148,13 @@ const rules = {
     }
   ]
 }
+const dialogVisible = ref(false)
+const searchPages = ref([])
+const searchForm = reactive({
+  name: null
+})
+const inputRef = ref(null)
+
 const submitForm = () => {
   formRef.value.validate((valid) => {
     loading.value = true
@@ -154,50 +162,43 @@ const submitForm = () => {
       loading.value = false
       return false
     }
-    drawerVisible.value = false
-    updatePassword(form.oldPass, form.newPass).then(res => {
-      notification('修改密码成功', '请重新登录')
-      logout().finally(() => {
-        removeCookies()
-        store.commit('setUserInfo', null)
-        router.push('/login')
-      })
+    updatePassword(form.oldPass, form.newPass).then(async res => {
+      if (res.data.code === 200) {
+        removeLoginState();
+        await router.push('/login');
+        drawerVisible.value = false;
+        notification('修改密码成功', '请重新登录');
+      }
     }).finally(() => {
-      loading.value = false
+      loading.value = false;
     })
   })
 }
 const resetForm = () => {
   formRef.value.resetFields()
 }
-const dialogVisible = ref(false)
-const searchPages = ref([])
-const searchForm = reactive({
-  name: null
-})
-const inputRef = ref(null)
+
 const handleClickSearch = () => {
-  dialogVisible.value = true
-  searchPages.value = menuList
+  dialogVisible.value = true;
+  searchPages.value = menuList;
 }
+
 const handleSearchPages = () => {
-  searchPages.value = menuList.filter(item => item.title.includes(searchForm.name))
+  searchPages.value = menuList.filter(item => item.title.includes(searchForm.name));
 }
+
 const handleRowClick = (row) => {
   router.push(row.path)
   dialogVisible.value = false
 }
+
 const handleCommand = (command) => {
   if (command === 'logout') {
-    messageBox('确定要退出登录吗？').then(() => {
-      notification('退出登录成功', '请重新登录')
-      logout().finally(() => {
-        removeCookies()
-        store.commit('setAdminInfo', null)
-        router.push('/login')
-      })
+    messageBox('确定要退出登录吗？').then(async () => {
+      await store.dispatch('adminLogout');
+      await router.push('/login');
+      notification("退出登录成功", "", "success");
     }).catch(() => {
-      notification('操作已取消', '', 'info')
     })
   }
   if (command === 'rePassword') {
@@ -221,7 +222,7 @@ const handleCommand = (command) => {
 
 
 .f-header .dropdown {
-  @apply flex items-center justify-center mx-5;
+  @apply flex items-center justify-center;
   cursor: pointer;
 }
 

@@ -2,7 +2,7 @@
   <el-card :body-class="'user-container'">
     <template #header>
       <div class="user-header">
-        <span>个人中心</span>
+        <span>个人信息</span>
       </div>
     </template>
     <el-form
@@ -17,7 +17,7 @@
             fit="cover"
             style="width: 100px; height: 100px"
         />
-        <el-button @click="openCropper">更换头像</el-button>
+        <el-button style="margin-left: 25px" type="primary" @click="openCropper">更换头像</el-button>
       </el-form-item>
       <el-form-item label="用户名" prop="username">
         <el-input v-model="userForm.username" placeholder="请输入用户名"/>
@@ -48,7 +48,7 @@
     <template #footer>
       <div class="user-footer">
         <el-button type="primary" @click="commit">更新信息</el-button>
-        <el-button type="danger" @click="reset">注销账号</el-button>
+        <el-button type="danger" @click="deleteUser">注销账号</el-button>
       </div>
     </template>
     <el-dialog
@@ -100,7 +100,8 @@
 <script setup>
 import {nextTick, onMounted, reactive, ref} from "vue";
 import {useStore} from "vuex";
-import {messageBox} from "../utils/message.js";
+import {useRouter} from "vue-router";
+import {message, messageBox} from "../utils/message.js";
 import ImgCropper from "../layout/components/ImgCropper.vue";
 
 const imgCropperRef = ref(null);
@@ -108,6 +109,7 @@ const isSendCode = ref(false);
 const sendCodeLoading = ref(false);
 const countDownTime = ref(Date.now() + 2 * 60 * 1000);
 const store = useStore();
+const router = useRouter();
 const userForm = reactive({
   userAvatar: null,
   username: "",
@@ -149,7 +151,8 @@ const userFormRules = {
 const updateEmailFormRules = {
   email: [
     {required: true, message: "请输入邮箱", trigger: "blur"},
-    {validator: (rule, value, callback) => {
+    {
+      validator: (rule, value, callback) => {
         if (value === userForm.email) {
           callback(new Error("邮箱不能与当前邮箱一致"));
         } else {
@@ -194,8 +197,7 @@ const commitAuthEmail = async () => {
     return false;
   }
   const res = await store.dispatch("updateEmail", updateEmailForm);
-  if(res)
-  {
+  if (res) {
     showDialogVisible.value = false;
     initData();
   }
@@ -214,9 +216,13 @@ const closeDialog = () => {
   updateEmailForm.email = userForm.email;
 };
 
-const reset = async () => {
-  await messageBox("确定要注销账号吗？", "提示", "warning");
-  await store.dispatch("userLogout");
+const deleteUser = () => {
+  messageBox("确定要注销账号吗？", "操作确认", "warning").then(async () => {
+    await store.dispatch("deleteUser");
+    await router.push("/");
+  }).catch(() => {
+    message("操作已取消", "info");
+  })
 };
 
 const initData = () => {

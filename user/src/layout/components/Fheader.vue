@@ -26,8 +26,8 @@
       <el-dropdown v-if="userInfo">
         <span class="dropdown">
           <el-avatar
-              class="avatar"
               :src="userInfo.userAvatar || '/defaultAvatar.png'"
+              class="avatar"
           />
           <span style="margin-left: 5px">{{ userInfo.username }}</span>
           <el-icon class="el-icon--right">
@@ -36,8 +36,8 @@
         </span>
         <template #dropdown>
           <el-dropdown-menu>
-            <el-dropdown-item @click="router.push('/user')">个人中心</el-dropdown-item>
-            <el-dropdown-item command="">意见反馈</el-dropdown-item>
+            <el-dropdown-item @click="router.push('/user')">个人信息</el-dropdown-item>
+            <el-dropdown-item @click="dialogVisible = true">意见反馈</el-dropdown-item>
             <el-dropdown-item @click="userLogout">退出登录</el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -55,21 +55,50 @@
         </el-button>
       </div>
     </div>
+    <el-dialog align-center v-model="dialogVisible" title="意见反馈" width="400px">
+      <el-form ref="feedbackFormRef" :model="feedbackForm" :rules="rules" label-position="right" label-width="auto">
+        <el-form-item label="反馈内容" prop="feedback">
+          <el-input v-model="feedbackForm.feedback" autocomplete="off" placeholder="请输入反馈内容..." type="textarea"/>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="handleCloseDialog">取消</el-button>
+        <el-button v-loading="loading" type="primary" @click="handleCommit">提交</el-button>
+      </template>
+    </el-dialog>
     <login-dialog ref="loginRef"></login-dialog>
   </el-card>
 </template>
 <script setup>
-import {computed, ref, watch} from "vue";
+import {computed, reactive, ref, watch} from "vue";
 import {UserFilled} from "@element-plus/icons-vue";
-import {messageBox} from "../../utils/message.js";
+import {message, messageBox} from "../../utils/message.js";
 import LoginDialog from "./LoginDialog.vue";
 import {useStore} from "vuex";
 import {useRouter} from "vue-router";
+import {addFeedback} from "../../api/manage.js";
 
 const router = useRouter();
 const store = useStore();
 const loginRef = ref(null);
+const feedbackFormRef = ref(null);
 const searchValue = ref("");
+const dialogVisible = ref(false);
+const loading = ref(false);
+const feedbackForm = reactive({
+  feedback: null,
+});
+const rules = {
+  feedback: [
+    {
+      required: true,
+      message: "请输入反馈内容",
+      trigger: "blur",
+    },
+  ],
+};
+const userInfo = computed(() => store.state.USER_INFO);
+
 const handleSearch = async () => {
   if (searchValue.value != null && searchValue.value !== "") {
     await router.push({
@@ -83,7 +112,7 @@ const handleSearch = async () => {
     await router.push("/library")
   }
 };
-const userInfo = computed(() => store.state.USER_INFO);
+
 const userLogout = () => {
   messageBox("确定要退出登录吗？", "提示", "warning", true).then(async () => {
     await router.push("/");
@@ -93,6 +122,23 @@ const userLogout = () => {
 
 const openLoginDialog = () => {
   loginRef.value.handleOpen();
+};
+
+const handleCloseDialog = () => {
+  dialogVisible.value = false;
+  feedbackFormRef.value?.resetFields();
+};
+
+const handleCommit = () => {
+  loading.value = true;
+  feedbackFormRef.value.validate().then(async () => {
+    const res = await addFeedback(feedbackForm);
+    if (res.data.code === 200) {
+      message("提交成功！");
+      handleCloseDialog();
+    }
+    loading.value = false;
+  });
 };
 
 watch(

@@ -50,7 +50,7 @@
                 <el-tag v-else type="info">未指定</el-tag>
               </template>
               <template v-else-if="column.showOverflowTooltip">
-                <el-tooltip :content="row[column.prop]" placement="top">
+                <el-tooltip :content="row[column.prop]" placement="top" effect="dark" :offset="-10">
                   <p class="descStyle">{{ row[column.prop] }}</p>
                 </el-tooltip>
               </template>
@@ -202,7 +202,9 @@ const fetchArtistList = async () => {
   getArtistList(searchForm).then(res => {
     artistList.value = res.data.data.records;
     artistList.value.forEach(item => {
-      item.birth = formatDate(new Date(item.birth), "YYYY-MM-DD");
+      if (item.birth) {
+        item.birth = formatDate(new Date(item.birth), "YYYY-MM-DD");
+      }
     });
     total.value = res.data.data.total;
   }).finally(() => {

@@ -1,5 +1,3 @@
-
-
 export const menuList = [
     {
         title: "首页",
@@ -52,7 +50,7 @@ export const menuList = [
             title: "反馈管理",
         },
         path: "/feedBackManage",
-        component: "FeedBackManage",
+        component: "FeedbackManage",
         icon: "VscFeedback",
     },
     {
@@ -63,5 +61,14 @@ export const menuList = [
         path: "/bannerManage",
         component: "BannerManage",
         icon: "TbCarouselHorizontal",
+    },
+    {
+        title: "日志管理",
+        meta: {
+            title: "日志管理",
+        },
+        path: "/logManage",
+        component: "LogManage",
+        icon: "Document",
     }
 ]

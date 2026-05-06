@@ -77,4 +77,8 @@ const isCollapse = ref(false);
   opacity: 0;
 }
 
+:deep(.el-card) {
+  border: none !important;
+}
+
 </style>

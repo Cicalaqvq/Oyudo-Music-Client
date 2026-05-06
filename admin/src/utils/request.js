@@ -1,6 +1,9 @@
 import axios from "axios";
-import {messageBox, notification} from "./message.js";
-import {getCookies, removeCookies} from "./auth.js";
+import store from "../store/index.js";
+import router from "../router/index.js";
+
+import {message, notification} from "./message.js";
+import {removeLoginState} from "./auth.js";
 
 
 const request = axios.create({
@@ -8,16 +11,16 @@ const request = axios.create({
     headers: {
         "Content-Type": "application/json;charset=utf-8",
     },
-    // timeout: 20*1000 // 默认超时时间为20秒
+    timeout: 10 * 1000 // 默认超时时间为10秒
 });
 
 // 请求拦截器
 request.interceptors.request.use(
     function (config) {
         // 在发送请求之前做些什么
-        const token = getCookies();
-        if (token) {
-            config.headers["token"] = token;
+        const token = store.state.ADMIN_TOKEN;
+        if (!token) {
+            config.headers["token-admin"] = token;
         }
         return config;
     },
@@ -32,25 +35,32 @@ request.interceptors.response.use(
     function (response) {
         // 2xx 范围内的状态码都会触发该函数。
         const code = response.data.code;
-
         if (code !== 200) {
             if (code === 401) {
-                messageBox("请重新登录", "登录已过期", "warning", false).then(() => {
-                    removeCookies()
-                    window.location.reload("/login")
-                })
-            } else {
-                notification("错误", response.data.msg || "请求失败", "error");
-                Promise.reject(response.data.msg)
+                message("未登录或登录已过期", "warning");
+                removeLoginState();
+                router.push("/login");
+            } else if (code === 404) {
+                message("未找到后端请求地址，请检查后端服务器", "error");
+            } else if (code === 500) {
+                message(response.data.msg, "error");
             }
+            return Promise.reject(response.data.msg);
         }
-        // 对响应数据做点什么
         return response;
     },
     function (error) {
-        notification("错误", error.message, "error");
+        const code = error.response.status;
+        let msg;
+        if (code === 500) {
+            msg = "请检查后端服务器";
+        } else if (code === 404) {
+            msg = "未找到后端请求地址";
+        } else {
+            msg = error.response.statusText;
+        }
+        notification(`错误代码：${code}`, `${msg}`, "error")
         return Promise.reject(error);
-    }
+    },
 );
-
 export default request;

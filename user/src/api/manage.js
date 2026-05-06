@@ -1,32 +1,35 @@
 import request from "../utils/request";
 
-export function getBanners() {
-    return request.get("/user/getBanners");
+export function login(loginForm) {
+    return request.post("/user/user/login", loginForm);
 }
 
+export function getCode(email) {
+    return request.get("/user/user/getCode", {params: {email: email}});
+}
 
-export function getCommentOfSong(songId) {
-    return request.get("/user/getCommentOfSong", {
-        params: {
-            songId: songId,
-        },
-    });
+export function register(registerForm) {
+    return request.post("/user/user/register", registerForm);
+}
+
+export function getBanners() {
+    return request.get("/user/banner/getBanners");
 }
 
 export function getAllSongs(searchForm) {
-    return request.get("/user/getAllSongs", {
+    return request.get("/user/song/getAllSongs", {
         params: searchForm,
     });
 }
 
 export function getArtists(searchForm) {
-    return request.get("/user/getArtists", {
+    return request.get("/user/artist/getArtists", {
         params: searchForm,
     });
 }
 
 export function getArtistDetail(artistId) {
-    return request.get("/user/getArtistDetail", {
+    return request.get("/user/artist/getArtistDetail", {
         params: {
             id: artistId,
         },
@@ -34,13 +37,13 @@ export function getArtistDetail(artistId) {
 }
 
 export function getAllPlaylists(searchForm) {
-    return request.get("/user/getAllPlaylists", {
+    return request.get("/user/playlist/getAllPlaylists", {
         params: searchForm,
     });
 }
 
 export function getPlaylistDetail(playlistId) {
-    return request.get("/user/getPlaylistDetail", {
+    return request.get("/user/playlist/getPlaylistDetail", {
         params: {
             id: playlistId,
         },
@@ -48,106 +51,39 @@ export function getPlaylistDetail(playlistId) {
 }
 
 export function getSongsOfPlaylist(playlistId) {
-    return request.get("/user/getSongsOfPlaylist", {
+    return request.get("/user/playlist/getSongsOfPlaylist", {
         params: {
             id: playlistId,
         },
     });
 }
 
-export function getCommentOfPlaylist(playlistId) {
-    return request.get("/user/getCommentOfPlaylist", {
-        params: {
-            playlistId: playlistId,
-        },
-    });
+export function getComments(searchForm) {
+    return request.get("/user/comment/getComments",
+        {
+            params: searchForm,
+        });
 }
 
-// 需要验证的操作
-export function login(loginForm) {
-    return request.post("/user/login", loginForm);
-}
-
-export function register(registerForm) {
-    return request.post("/user/register", registerForm);
-}
-
+// 需要登录过才能进行的操作
 export function logout() {
-    return request.post("/user/logout");
+    return request.post("/user/user/logout");
 }
 
-export function getCode(email) {
-    return request.get("/user/getCode", {params: {email: email}});
-}
-
-export function likeSong(songIds) {
-    return request.post("/user/addFavorite", {
-        songIds: songIds,
-        type: 0,
-    });
-}
-
-export function unlikeSong(songIds) {
-    return request.delete("/user/removeFavorite", {
-        params: {
-            songIds: songIds,
-            type: 0,
-        },
-    });
-}
-
-export function likePlaylist(playlistIds) {
-    return request.post("/user/addFavorite", {
-        playlistIds: playlistIds,
-        type: 1,
-    });
-}
-
-export function unlikePlaylist(playlistIds) {
-    return request.delete("/user/removeFavorite", {
-        params: {
-            playlistIds: playlistIds,
-            type: 1,
-        },
-    });
-}
-
-export function getSongFavorite(songIds) {
-    return request.get("/user/getFavorite", {
-        params: {
-            songIds: songIds,
-            type: 0,
-        },
-    });
-}
-
-export function getPlaylistFavorite(playlistIds) {
-    return request.get("/user/getFavorite", {
-        params: {
-            playlistIds: playlistIds,
-            type: 1,
-        },
-    });
+export function updateEmail(emailForm) {
+    return request.put("/user/user/updateEmail", emailForm);
 }
 
 export function getUserInfo() {
-    return request.get("/user/getUserInfo");
+    return request.get("/user/user/getUserInfo");
 }
 
 export function updateUserInfo(userForm) {
-    return request.put("/user/updateUser", userForm);
+    return request.put("/user/user/updateUser", userForm);
 }
 
 export function resetPwd(resetPwdForm) {
-    return request.put("/user/resetPwd", resetPwdForm);
-}
-
-export function addComment(commentForm) {
-    return request.post("/user/addComment", commentForm);
-}
-
-export function likeComment(commentId) {
-    return request.put(`/user/likeComment/${commentId}`);
+    return request.put("/user/user/resetPwd", resetPwdForm);
 }
 
 export function uploadImg(formData) {
@@ -159,8 +95,75 @@ export function uploadImg(formData) {
     );
 }
 
-export function updateEmail(emailForm){
-    return request.put("/user/updateEmail", emailForm);
+export function likeSong(songIds) {
+    return request.post("/user/favorite/addFavorite", {
+        songIds: songIds,
+        type: 0,
+    });
+}
+
+export function unlikeSong(songIds) {
+    return request.delete("/user/favorite/removeFavorite", {
+        params: {
+            songIds: songIds,
+            type: 0,
+        },
+    });
+}
+
+export function likePlaylist(playlistIds) {
+    return request.post("/user/favorite/addFavorite", {
+        playlistIds: playlistIds,
+        type: 1,
+    });
+}
+
+export function unlikePlaylist(playlistIds) {
+    return request.delete("/user/favorite/removeFavorite", {
+        params: {
+            playlistIds: playlistIds,
+            type: 1,
+        },
+    });
+}
+
+export function getSongFavorite() {
+    return request.get("/user/favorite/getFavorite", {
+        params: {
+            type: 0,
+        },
+    });
+}
+
+export function getPlaylistFavorite() {
+    return request.get("/user/favorite/getFavorite", {
+        params: {
+            type: 1,
+        },
+    });
+}
+
+export function addComment(commentForm) {
+    return request.post("/user/comment/addComment", commentForm);
+}
+
+export function likeComment(commentId) {
+    return request.put(`/user/comment/likeComment/${commentId}`);
+}
+
+export function addFeedback(feedbackForm) {
+    return request.post("/user/feedback/addFeedback", feedbackForm);
+}
+
+export function getCommentsByUser(searchForm) {
+    return request.get("/user/comment/getCommentsByUser",
+        {
+            params: searchForm,
+        });
+}
+
+export function deleteComment(commentId) {
+    return request.delete(`/user/comment/deleteComment/${commentId}`,);
 }
 
 // 推荐算法
@@ -180,10 +183,10 @@ export function getRecommendSongs() {
     return request.get("/common/recommend/getRecommendSongs");
 }
 
-export function refreshRecommendSongs(){
+export function refreshRecommendSongs() {
     return request.get("/common/recommend/refreshRecommendSongs");
 }
 
-export function refreshRecommendPlaylists(){
+export function refreshRecommendPlaylists() {
     return request.get("/common/recommend/refreshRecommendPlaylists");
 }

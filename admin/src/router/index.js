@@ -1,64 +1,27 @@
 import {createRouter, createWebHistory} from "vue-router";
-import {getCookies} from "../utils/auth.js";
 import {notification} from "../utils/message.js";
 import {hideFullLoading, showFullLoading} from "../utils/fullLoading.js";
+import store from "../store/index.js";
+import {menuList} from "../utils/menus.js";
 
 const routes = [
     {
         path: "/",
         component: () => import("../layout/admin.vue"),
         redirect: "/index",
-        children: [
-            {
-                path: "/index",
-                component: () => import("../pages/Statistics.vue"),
-                meta: {
-                    title: "首页",
-                },
-            },
-            {
-                path: "/userManage",
-                component: () => import("../pages/manage/UserManage.vue"),
-                meta: {
-                    title: "用户管理",
-                },
-            },
-            {
-                path: "/artistManage",
-                component: () => import("../pages/manage/ArtistManage.vue"),
-                meta: {
-                    title: "歌手管理",
+        children: menuList.map(menu => ({
+            path: menu.path,
+            // 根据组件名称动态导入对应的组件
+            component: () => {
+                // 首页特殊处理
+                if (menu.component === 'Index') {
+                    return import("../pages/Statistics.vue")
                 }
+                // 其他管理页面
+                return import(`../pages/manage/${menu.component}.vue`)
             },
-            {
-                path: "/songManage",
-                component: () => import("../pages/manage/SongManage.vue"),
-                meta: {
-                    title: "歌曲管理",
-                }
-            },
-            {
-                path: "/playlistManage",
-                component: () => import("../pages/manage/PlaylistManage.vue"),
-                meta: {
-                    title: "歌单管理",
-                }
-            },
-            {
-                path: "/feedBackManage",
-                component: () => import("../pages/manage/FeedbackManage.vue"),
-                meta: {
-                    title: "反馈管理",
-                }
-            },
-            {
-                path: "/bannerManage",
-                component: () => import("../pages/manage/BannerManage.vue"),
-                meta: {
-                    title: "轮播图管理",
-                }
-            }
-        ],
+            meta: menu.meta,
+        })),
     },
     {
         path: "/login",
@@ -82,21 +45,19 @@ export const router = createRouter({
 // 设置全局路由守卫
 router.beforeEach(async (to, from, next) => {
     showFullLoading();
-
-    const token = getCookies();
-
-    if (!token && to.path !== "/login") {
-        notification("提示", "请先登录", "warning");
-        return next({path: "/login"});
+    if (store.state.IS_LOGIN) {
+        await store.dispatch("getAdminInfo");
     }
-
-    if (token && to.path === "/login") {
+    if (to.path === "/login" && store.state.IS_LOGIN) {
         notification("提示", "已登录，请勿重复登录", "warning");
-        return next({path: from.path ? from.path : "/"});
+        next({path: from.path ? from.path : "/"});
+    } else if (to.path !== "/login" && !store.state.IS_LOGIN) {
+        notification("提示", "请先登录", "warning");
+        next({path: "/login"});
+    } else {
+        next();
     }
-
-    document.title = (to.meta.title || "无标题") + " - " + "音乐管理后台";
-    next();
+    document.title = "Oyudo Music后台" + " - " + (to.meta.title || "无标题");
 });
 
 router.afterEach((to, from) => {

@@ -250,9 +250,9 @@ import {LiaRandomSolid} from "vue-icons-plus/lia";
 import {useStore} from "vuex";
 import {message} from "../../utils/message.js";
 import SongDetail from "./SongDetail.vue";
-import {fetchFavoriteSongs, toggleFavoriteSong,} from "../../utils/userFavorite.js";
-import {fetchSongComments} from "../../utils/userComment.js";
-import {handle25Percent, handle75Percent} from "../../utils/Song.js";
+import {checkFavoriteSong, toggleFavoriteSong,} from "../../utils/userFavorite.js";
+import {fetchSongCommentsBySongId} from "../../utils/userComment.js";
+import {handle25Percent, handle75Percent} from "../../utils/userSong.js";
 
 const store = useStore();
 const popoverVisible = ref(false);
@@ -327,7 +327,7 @@ const showSongDetail = () => {
 };
 
 const fetchComments = async () => {
-  comments.value = await fetchSongComments(localCurrentSong.value.id) || [];
+  comments.value = await fetchSongCommentsBySongId(localCurrentSong.value.id) || [];
 };
 
 // 播放歌曲
@@ -374,7 +374,7 @@ const togglePlay = () => {
 };
 
 // 上一首
-const previousSong = () => {
+const previousSong = async () => {
   handleAudioProcess();
   try {
     store.commit("TRACK_LIST_IS_EMPTY");
@@ -385,14 +385,13 @@ const previousSong = () => {
   }
   if (!localPlayMode.value !== 2) {
     store.commit("SET_PREV_SONG");
-    fetchFavorite();
   } else {
     audioRef.value.currentTime = 0;
   }
 };
 
 // 下一首
-const nextSong = () => {
+const nextSong = async () => {
   handleAudioProcess();
   try {
     store.commit("TRACK_LIST_IS_EMPTY");
@@ -402,7 +401,6 @@ const nextSong = () => {
   }
   if (localPlayMode.value !== 2) {
     store.commit("SET_NEXT_SONG");
-    fetchFavorite();
   }
   audioRef.value.currentTime = 0;
 };
@@ -413,11 +411,6 @@ const toggleFavorite = async () => {
       [store.state.CURRENT_SONG],
       isFavorite.value,
   );
-};
-
-const fetchFavorite = async () => {
-  const songs = await fetchFavoriteSongs([store.state.CURRENT_SONG.id]);
-  isFavorite.value = songs.length > 0;
 };
 
 // 音量改变
@@ -434,9 +427,9 @@ const onTimeUpdate = (e) => {
 };
 
 // 元数据加载完成
-const onLoadedMetadata = (e) => {
+const onLoadedMetadata = async (e) => {
   duration.value = e.target.duration;
-  fetchFavorite();
+  isFavorite.value = await checkFavoriteSong(store.state.CURRENT_SONG.id);
 };
 
 // 播放结束
@@ -489,26 +482,13 @@ watchEffect(() => {
       return;
     }
     nextTick(() => {
-      if (!hasUserInteracted.value) {
-        store.commit("SET_PLAYING", false);
-        message("请点击播放按钮开始播放", "warning");
-        return;
-      }
-      const playPromise = audioRef.value.play();
+      const playPromise = audioRef.value?.play();
       if (playPromise !== undefined) {
         playPromise.then(() => {
           audioRef.value.volume = volume / 100;
         });
-        playPromise.catch((error) => {
-          if (error.name === "NotAllowedError") {
-            store.commit("SET_PLAYING", false);
-            hasUserInteracted.value = false;
-            message("请点击播放按钮开始播放", "warning");
-          } else if (error.name !== "AbortError") {
-            message("音频播放异常，请联系管理员处理", "error");
-            console.error("音频播放错误:", error);
-          }
-          store.state.IS_PLAYING = false;
+        playPromise.catch(() => {
+          store.commit("SET_PLAYING", false);
         });
       }
     });
@@ -516,14 +496,6 @@ watchEffect(() => {
     audioRef.value.pause();
   }
 });
-
-document.addEventListener('click', () => {
-  hasUserInteracted.value = true;
-}, {once: true});
-
-document.addEventListener('keydown', () => {
-  hasUserInteracted.value = true;
-}, {once: true});
 </script>
 
 <style scoped>

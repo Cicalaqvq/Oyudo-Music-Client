@@ -1,8 +1,8 @@
-import { createApp } from "vue";
+import {createApp} from "vue";
 // import './style.css'
 import "./assets/reset.css";
 import App from "./App.vue";
-import ElementPlus, { ElLoading } from "element-plus";
+import ElementPlus from "element-plus";
 import "element-plus/dist/index.css";
 import "virtual:windi.css";
 import router from "./router";
@@ -15,24 +15,26 @@ import * as VueIconsPlusHi2 from "vue-icons-plus/hi2";
 import * as VueIconsPlusSl from "vue-icons-plus/sl";
 import * as VueIconsPlusIp from "vue-icons-plus/ip";
 
+import zhCn from "element-plus/es/locale/lang/zh-cn"
+
 const app = createApp(App);
 
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-  app.component(key, component);
+    app.component(key, component);
 }
 for (const [key, component] of Object.entries(VueIconsPlusHi2)) {
-  app.component(key, component);
+    app.component(key, component);
 }
 for (const [key, component] of Object.entries(VueIconsPlusSl)) {
-  app.component(key, component);
+    app.component(key, component);
 }
 for (const [key, component] of Object.entries(VueIconsPlusIp)) {
-  app.component(key, component);
+    app.component(key, component);
 }
 
 app.use(store);
 app.use(router);
 app.use(VueCropper);
-app.use(ElementPlus);
+app.use(ElementPlus, {locale: zhCn});
 
 app.mount("#app");

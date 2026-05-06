@@ -226,13 +226,14 @@ import {BsCloudDownload} from "vue-icons-plus/bs";
 import {useRoute} from "vue-router";
 import {addScoreToPlaylist, getPlaylistDetail, getSongsOfPlaylist,} from "../api/manage.js";
 import {
+  checkFavoritePlaylist,
   fetchFavoritePlaylists,
   fetchFavoriteSongs,
   toggleFavoritePlaylist,
   toggleFavoriteSong,
 } from "../utils/userFavorite.js";
-import {fetchPlaylistComments, publishComment, toggleFavoriteComment} from "../utils/userComment.js";
-import {download, playSongs} from "../utils/Song.js";
+import {fetchPlaylistCommentsByPlaylistId, publishComment, toggleFavoriteComment} from "../utils/userComment.js";
+import {download, playSongs} from "../utils/userSong.js";
 
 
 const isShowTooltip = ref(false);
@@ -314,7 +315,7 @@ const columns = [
 ];
 
 const likeComment = async (commentId) => {
-  const res = await toggleFavoriteComment(store, commentId);
+  const res = await toggleFavoriteComment(commentId);
   if (res) await fetchComments();
 };
 
@@ -349,7 +350,7 @@ const toggleLikePlaylist = async () => {
 };
 
 const submitComment = async () => {
-  const res = await publishComment(store, commentForm);
+  const res = await publishComment(commentForm);
   if (res) {
     commentForm.content = "";
     await fetchComments();
@@ -372,8 +373,7 @@ const fetchPlaylistDetail = async () => {
     localPlaylist.introduction = data.introduction;
     localPlaylist.style = data.style;
     store.commit("SET_SELECTED_PLAYLIST", data);
-    const favoritePlaylist = await fetchFavoritePlaylists([data.id]);
-    localPlaylist.isLike = favoritePlaylist.length > 0;
+    localPlaylist.isLike = await checkFavoritePlaylist(data.id);
   }
 };
 
@@ -398,7 +398,7 @@ const fetchPlaylistSongs = async () => {
 
 // 获取歌单评论
 const fetchComments = async () => {
-  comments.value = (await fetchPlaylistComments(localPlaylist.id)) || [];
+  comments.value = (await fetchPlaylistCommentsByPlaylistId(localPlaylist.id)) || [];
 };
 
 // 获取用户收藏的歌单歌曲

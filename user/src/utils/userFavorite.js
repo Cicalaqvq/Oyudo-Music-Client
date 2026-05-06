@@ -12,7 +12,7 @@ import {message} from "./message.js";
 import store from "../store/index.js"
 
 export async function toggleFavoriteSong(songs, isFavoriteOriginal) {
-    if (!checkLogin(store)) {
+    if (!checkLogin()) {
         message("请先登录", "warning");
         store.commit("SET_SHOW_LOGIN_DIALOG", true);
         return;
@@ -38,7 +38,7 @@ export async function toggleFavoritePlaylist(
     playlist,
     isFavoriteOriginal,
 ) {
-    if (!checkLogin(store)) {
+    if (!checkLogin()) {
         message("请先登录", "warning");
         store.commit("SET_SHOW_LOGIN_DIALOG", true);
         return;
@@ -62,11 +62,11 @@ export async function toggleFavoritePlaylist(
     }
 }
 
-export async function fetchFavoriteSongs(songIds = []) {
-    if (!checkLogin(store)) {
+export async function fetchFavoriteSongs() {
+    if (!checkLogin()) {
         return [];
     }
-    const res = await getSongFavorite(songIds);
+    const res = await getSongFavorite();
     if (res.data.code === 200) {
         const songs = res.data.data.songs;
         if (songs.length > 0) {
@@ -85,13 +85,37 @@ export async function fetchFavoriteSongs(songIds = []) {
 
 }
 
-export async function fetchFavoritePlaylists(playlistIds = []) {
-    if (!checkLogin(store)) {
+export async function fetchFavoritePlaylists() {
+    if (!checkLogin()) {
         return [];
     }
-    const res = await getPlaylistFavorite(playlistIds);
+    const res = await getPlaylistFavorite();
     if (res.data.code === 200) {
         return res.data.data.playlists;
     }
     return [];
+}
+
+export async function checkFavoriteSong(songId) {
+    if (!checkLogin()) {
+        return false;
+    }
+    const res = await getSongFavorite();
+    if (res.data.code === 200) {
+        const likedSongs = res.data.data.songs;
+        return likedSongs.some((song) => song.id === songId);
+    }
+    return false;
+}
+
+export async function checkFavoritePlaylist(playlistId) {
+    if (!checkLogin()) {
+        return false;
+    }
+    const res = await getPlaylistFavorite();
+    if (res.data.code === 200) {
+        const likedPlaylists = res.data.data.playlists;
+        return likedPlaylists.some((playlist) => playlist.id === playlistId);
+    }
+    return false;
 }

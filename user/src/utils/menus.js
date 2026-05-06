@@ -53,13 +53,22 @@ export const menuList = [
         icon: "IpLike",
       },
       {
-        title: "个人中心",
+        title: "个人信息",
         meta: {
-          title: "个人中心",
+          title: "个人信息",
         },
         path: "/user",
         component: "User",
         icon: "User",
+      },
+      {
+        title: "评论管理",
+        meta: {
+          title: "评论管理",
+        },
+        path: "/comment",
+        component: "Comment",
+        icon: "ChatLineSquare",
       },
     ],
   },
